@@ -1,0 +1,36 @@
+.header {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 24px;
+  background-color: #09335a;
+}
+
+.header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 36px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 80%;
+  gap: 16px;
+}
+
+.header p {
+  margin: 0;
+  color: #ffffff;
+}
+
+@media screen and (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+  }
+}

@@ -1,0 +1,12 @@
+.carGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  gap: 20px;
+}
+
+.card {
+  width: calc(25% - 20px);
+  min-width: 250px;
+}

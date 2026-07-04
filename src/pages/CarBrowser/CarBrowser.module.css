@@ -1,0 +1,25 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #09335aab;
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+  margin-bottom: 16px;
+  padding: 20px;
+}
+
+.counter {
+  width: 100%;
+  margin: 16px 0;
+  color: #ffffff;
+  font-weight: 600;
+  text-align: center;
+}

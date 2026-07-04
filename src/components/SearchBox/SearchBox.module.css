@@ -1,0 +1,28 @@
+.searchBox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 16px;
+  gap: 8px;
+  background-color: #ffffff;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+}
+
+.searchBox label {
+  color: #1f2933;
+  font-weight: 600;
+}
+
+.searchBox input {
+  width: 100%;
+  padding: 10px 12px;
+  color: #1f2933;
+  font-size: 16px;
+  border: none;
+  border-bottom: 2px solid #173a93 ;
+  padding: 8px; 
+  outline: none; 
+}
+
