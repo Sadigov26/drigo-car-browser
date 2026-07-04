@@ -10,7 +10,7 @@ function CarCard({ car, className = "" }) {
       <div className={styles.cardTop}>
         <h2 className={styles.title}>{car.name}</h2>
         <span className={badgeClassName}>
-          {car.available ? "For Rent" : "Rented"}
+          {car.available ? "Available" : "Unavailable"}
         </span>
       </div>
       <div className={styles.details}>

@@ -3,23 +3,23 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  min-height: 100vh;
   margin: 0 auto;
-  background-color: #09335aab;
+  background-color: #eef4f8;
 }
 
 .searchContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 80%;
-  margin-bottom: 16px;
-  padding: 20px;
+  width: min(1120px, 100%);
+  padding: 24px 20px 40px;
 }
 
 .counter {
   width: 100%;
-  margin: 16px 0;
-  color: #ffffff;
+  margin: 8px 0 20px;
+  color: #17324d;
   font-weight: 600;
   text-align: center;
 }
@@ -46,4 +46,8 @@
   background-color: #17406a;
   border: none;
   border-radius: 6px;
+}
+
+.emptyState button:hover {
+  background-color: #0f2d4d;
 }

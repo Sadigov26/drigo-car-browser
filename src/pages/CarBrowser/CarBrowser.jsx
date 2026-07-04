@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import CarGrid from "../../components/CarGrid/CarGrid";
+import Footer from "../../components/Footer/Footer";
 import SearchBox from "../../components/SearchBox/SearchBox";
 import cars from "../../data/cars.json";
 import styles from "./CarBrowser.module.css";
@@ -154,6 +155,7 @@ const CarBrowser = () => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };
