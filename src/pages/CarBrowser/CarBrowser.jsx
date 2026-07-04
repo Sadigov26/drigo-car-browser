@@ -11,6 +11,7 @@ const CarBrowser = () => {
   const [transmissionFilter, setTransmissionFilter] = useState("All");
   const [typeFilter, setTypeFilter] = useState("All");
   const [availableOnly, setAvailableOnly] = useState(false);
+  const [sortOrder, setSortOrder] = useState("lowToHigh");
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -22,36 +23,40 @@ const CarBrowser = () => {
     };
   }, [searchText]);
 
-
+  const resetFilters = () => {
+    setSearchText("");
+    setDebouncedSearchText("");
+    setTransmissionFilter("All");
+    setTypeFilter("All");
+    setAvailableOnly(false);
+    setSortOrder("lowToHigh");
+  };
 
   const filteredCars = cars.filter((car) => {
     const matchesSearch = car.name
       .toLowerCase()
       .includes(debouncedSearchText.toLowerCase());
 
-
-
-
-
     const matchesTransmission =
       transmissionFilter === "All" || car.transmission === transmissionFilter;
 
-
-
     const matchesType = typeFilter === "All" || car.type === typeFilter;
-
-
-
     const matchesAvailability = !availableOnly || car.available;
 
-
-    
     return (
       matchesSearch &&
       matchesTransmission &&
       matchesType &&
       matchesAvailability
     );
+  });
+
+  const sortedCars = [...filteredCars].sort((firstCar, secondCar) => {
+    if (sortOrder === "highToLow") {
+      return secondCar.pricePerDay - firstCar.pricePerDay;
+    }
+
+    return firstCar.pricePerDay - secondCar.pricePerDay;
   });
 
   return (
@@ -67,11 +72,24 @@ const CarBrowser = () => {
           onTypeChange={setTypeFilter}
           availableOnly={availableOnly}
           onAvailableChange={setAvailableOnly}
+          sortOrder={sortOrder}
+          onSortChange={setSortOrder}
         />
+
         <p className={styles.counter}>
-          AVAILABLE  {filteredCars.length} of {cars.length} CARS
+          Showing {sortedCars.length} of {cars.length} cars
         </p>
-        <CarGrid cars={filteredCars} />
+
+        {sortedCars.length > 0 ? (
+          <CarGrid cars={sortedCars} />
+        ) : (
+          <div className={styles.emptyState}>
+            <p>No cars match your search and filters.</p>
+            <button type="button" onClick={resetFilters}>
+              Reset filters
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

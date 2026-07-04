@@ -9,6 +9,8 @@ const SearchBox = ({
   onTypeChange,
   availableOnly,
   onAvailableChange,
+  sortOrder,
+  onSortChange,
 }) => {
   return (
     <div className={styles.searchBox}>
@@ -59,6 +61,18 @@ const SearchBox = ({
         />
         Available only
       </label>
+
+      <div className={styles.field}>
+        <label htmlFor="sort">Sort by price</label>
+        <select
+          id="sort"
+          value={sortOrder}
+          onChange={(event) => onSortChange(event.target.value)}
+        >
+          <option value="lowToHigh">Low to High</option>
+          <option value="highToLow">High to Low</option>
+        </select>
+      </div>
     </div>
   );
 };
