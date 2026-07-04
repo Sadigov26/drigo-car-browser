@@ -1,17 +1,47 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import CarGrid from "../../components/CarGrid/CarGrid";
 import SearchBox from "../../components/SearchBox/SearchBox";
 import cars from "../../data/cars.json";
 import styles from "./CarBrowser.module.css";
 
+const transmissionOptions = ["All", "Automatic", "Manual"];
+const typeOptions = ["All", "Economy", "Sedan", "SUV", "Luxury"];
+const sortOptions = ["lowToHigh", "highToLow"];
+
+const getFilterValuesFromUrl = (searchParams) => {
+  const search = searchParams.get("search") || "";
+  const transmission = searchParams.get("transmission") || "All";
+  const type = searchParams.get("type") || "All";
+  const available = searchParams.get("available") === "true";
+  const sort = searchParams.get("sort") || "lowToHigh";
+
+  return {
+    search,
+    transmission: transmissionOptions.includes(transmission)
+      ? transmission
+      : "All",
+    type: typeOptions.includes(type) ? type : "All",
+    available,
+    sort: sortOptions.includes(sort) ? sort : "lowToHigh",
+  };
+};
+
 const CarBrowser = () => {
-  const [searchText, setSearchText] = useState("");
-  const [debouncedSearchText, setDebouncedSearchText] = useState("");
-  const [transmissionFilter, setTransmissionFilter] = useState("All");
-  const [typeFilter, setTypeFilter] = useState("All");
-  const [availableOnly, setAvailableOnly] = useState(false);
-  const [sortOrder, setSortOrder] = useState("lowToHigh");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlValues = getFilterValuesFromUrl(searchParams);
+
+  const [searchText, setSearchText] = useState(urlValues.search);
+  const [debouncedSearchText, setDebouncedSearchText] = useState(
+    urlValues.search,
+  );
+  const [transmissionFilter, setTransmissionFilter] = useState(
+    urlValues.transmission,
+  );
+  const [typeFilter, setTypeFilter] = useState(urlValues.type);
+  const [availableOnly, setAvailableOnly] = useState(urlValues.available);
+  const [sortOrder, setSortOrder] = useState(urlValues.sort);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -22,6 +52,42 @@ const CarBrowser = () => {
       clearTimeout(timerId);
     };
   }, [searchText]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+
+    if (debouncedSearchText) {
+      nextParams.set("search", debouncedSearchText);
+    }
+
+    if (transmissionFilter !== "All") {
+      nextParams.set("transmission", transmissionFilter);
+    }
+
+    if (typeFilter !== "All") {
+      nextParams.set("type", typeFilter);
+    }
+
+    if (availableOnly) {
+      nextParams.set("available", "true");
+    }
+
+    if (sortOrder !== "lowToHigh") {
+      nextParams.set("sort", sortOrder);
+    }
+
+    if (nextParams.toString() !== searchParams.toString()) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [
+    debouncedSearchText,
+    transmissionFilter,
+    typeFilter,
+    availableOnly,
+    sortOrder,
+    searchParams,
+    setSearchParams,
+  ]);
 
   const resetFilters = () => {
     setSearchText("");
@@ -44,10 +110,7 @@ const CarBrowser = () => {
     const matchesAvailability = !availableOnly || car.available;
 
     return (
-      matchesSearch &&
-      matchesTransmission &&
-      matchesType &&
-      matchesAvailability
+      matchesSearch && matchesTransmission && matchesType && matchesAvailability
     );
   });
 
