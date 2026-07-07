@@ -22,6 +22,8 @@ export const filterCars = (cars, filters) => {
       filters.seats === "All" || car.seats === Number(filters.seats);
 
     const matchesAvailability = !filters.available || car.available;
+    const matchesFavorite =
+      !filters.favoritesOnly || filters.favoriteIds.includes(car.id);
 
     return (
       matchesSearch &&
@@ -30,7 +32,8 @@ export const filterCars = (cars, filters) => {
       matchesMinPrice &&
       matchesMaxPrice &&
       matchesSeats &&
-      matchesAvailability
+      matchesAvailability &&
+      matchesFavorite
     );
   });
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 import { useSearchParams } from "react-router-dom";
 import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackMessage";
 import Footer from "../../components/layout/Footer/Footer";
@@ -6,12 +6,14 @@ import Header from "../../components/layout/Header/Header";
 import CarGrid from "../../features/cars/components/CarGrid/CarGrid";
 import Pagination from "../../features/cars/components/Pagination/Pagination";
 import SearchBox from "../../features/cars/components/SearchBox/SearchBox";
-import {
-  DEFAULT_FILTERS,
-  PAGE_SIZE,
-} from "../../features/cars/constants/carOptions";
+import { PAGE_SIZE } from "../../features/cars/constants/carOptions";
 import { useCars } from "../../features/cars/hooks/useCars";
 import { useDebounce } from "../../features/cars/hooks/useDebounce";
+import { useFavorites } from "../../features/cars/hooks/useFavorites";
+import {
+  carFiltersReducer,
+  createInitialFilters,
+} from "../../features/cars/reducers/carFiltersReducer";
 import {
   clampPage,
   filterCars,
@@ -27,51 +29,70 @@ import styles from "./CarBrowser.module.css";
 
 const CarBrowser = () => {
   const { data: cars, error, loading, retry } = useCars();
+  const { favoriteIds, isFavorite, toggleFavorite } = useFavorites();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlValues = getFilterValuesFromUrl(searchParams);
-
-  const [searchText, setSearchText] = useState(urlValues.search);
-  const [transmissionFilter, setTransmissionFilter] = useState(
-    urlValues.transmission,
+  const [filters, dispatch] = useReducer(
+    carFiltersReducer,
+    urlValues,
+    createInitialFilters,
   );
-  const [typeFilters, setTypeFilters] = useState(urlValues.types);
-  const [minPrice, setMinPrice] = useState(urlValues.minPrice);
-  const [maxPrice, setMaxPrice] = useState(urlValues.maxPrice);
-  const [seatsFilter, setSeatsFilter] = useState(urlValues.seats);
-  const [availableOnly, setAvailableOnly] = useState(urlValues.available);
-  const [sortOrder, setSortOrder] = useState(urlValues.sort);
-  const [currentPage, setCurrentPage] = useState(urlValues.page);
 
-  const debouncedSearchText = useDebounce(searchText, 300);
-  const debouncedMinPrice = useDebounce(minPrice, 300);
-  const debouncedMaxPrice = useDebounce(maxPrice, 300);
+  const debouncedSearchText = useDebounce(filters.search, 300);
+  const debouncedMinPrice = useDebounce(filters.minPrice, 300);
+  const debouncedMaxPrice = useDebounce(filters.maxPrice, 300);
 
-  const filteredCars = filterCars(cars, {
-    search: debouncedSearchText,
-    transmission: transmissionFilter,
-    types: typeFilters,
-    minPrice: debouncedMinPrice,
-    maxPrice: debouncedMaxPrice,
-    seats: seatsFilter,
-    available: availableOnly,
-  });
+  const visibleState = useMemo(() => {
+    const filteredCars = filterCars(cars, {
+      search: debouncedSearchText,
+      transmission: filters.transmission,
+      types: filters.types,
+      minPrice: debouncedMinPrice,
+      maxPrice: debouncedMaxPrice,
+      seats: filters.seats,
+      available: filters.available,
+      favoritesOnly: filters.favoritesOnly,
+      favoriteIds,
+    });
 
-  const sortedCars = sortCars(filteredCars, sortOrder);
-  const pageCount = getPageCount(sortedCars.length, PAGE_SIZE);
-  const safePage = clampPage(currentPage, pageCount);
-  const visibleCars = paginateCars(sortedCars, safePage, PAGE_SIZE);
+    const sortedCars = sortCars(filteredCars, filters.sort);
+    const pageCount = getPageCount(sortedCars.length, PAGE_SIZE);
+    const safePage = clampPage(filters.page, pageCount);
+    const visibleCars = paginateCars(sortedCars, safePage, PAGE_SIZE);
+
+    return {
+      pageCount,
+      safePage,
+      sortedCars,
+      visibleCars,
+    };
+  }, [
+    cars,
+    debouncedSearchText,
+    filters.transmission,
+    filters.types,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+    filters.seats,
+    filters.available,
+    filters.favoritesOnly,
+    filters.sort,
+    filters.page,
+    favoriteIds,
+  ]);
 
   useEffect(() => {
     const nextParams = buildFilterSearchParams({
       search: debouncedSearchText,
-      transmission: transmissionFilter,
-      types: typeFilters,
+      transmission: filters.transmission,
+      types: filters.types,
       minPrice: debouncedMinPrice,
       maxPrice: debouncedMaxPrice,
-      seats: seatsFilter,
-      available: availableOnly,
-      sort: sortOrder,
-      page: safePage,
+      seats: filters.seats,
+      available: filters.available,
+      favoritesOnly: filters.favoritesOnly,
+      sort: filters.sort,
+      page: visibleState.safePage,
     });
 
     if (nextParams.toString() !== searchParams.toString()) {
@@ -79,73 +100,18 @@ const CarBrowser = () => {
     }
   }, [
     debouncedSearchText,
-    transmissionFilter,
-    typeFilters,
+    filters.transmission,
+    filters.types,
     debouncedMinPrice,
     debouncedMaxPrice,
-    seatsFilter,
-    availableOnly,
-    sortOrder,
-    safePage,
+    filters.seats,
+    filters.available,
+    filters.favoritesOnly,
+    filters.sort,
+    visibleState.safePage,
     searchParams,
     setSearchParams,
   ]);
-
-  const resetPage = () => {
-    setCurrentPage(DEFAULT_FILTERS.page);
-  };
-
-  const changeSearchText = (value) => {
-    setSearchText(value);
-    resetPage();
-  };
-
-  const changeTransmissionFilter = (value) => {
-    setTransmissionFilter(value);
-    resetPage();
-  };
-
-  const changeTypeFilters = (value) => {
-    setTypeFilters(value);
-    resetPage();
-  };
-
-  const changeMinPrice = (value) => {
-    setMinPrice(value);
-    resetPage();
-  };
-
-  const changeMaxPrice = (value) => {
-    setMaxPrice(value);
-    resetPage();
-  };
-
-  const changeSeatsFilter = (value) => {
-    setSeatsFilter(value);
-    resetPage();
-  };
-
-  const changeAvailableOnly = (value) => {
-    setAvailableOnly(value);
-    resetPage();
-  };
-
-  const changeSortOrder = (value) => {
-    setSortOrder(value);
-    resetPage();
-  };
-
-  const resetFilters = () => {
-    setSearchText(DEFAULT_FILTERS.search);
-    setTransmissionFilter(DEFAULT_FILTERS.transmission);
-    setTypeFilters(DEFAULT_FILTERS.types);
-    setMinPrice(DEFAULT_FILTERS.minPrice);
-    setMaxPrice(DEFAULT_FILTERS.maxPrice);
-    setSeatsFilter(DEFAULT_FILTERS.seats);
-    setAvailableOnly(DEFAULT_FILTERS.available);
-    setSortOrder(DEFAULT_FILTERS.sort);
-    setCurrentPage(DEFAULT_FILTERS.page);
-  };
 
   return (
     <div className={styles.page}>
@@ -163,42 +129,59 @@ const CarBrowser = () => {
         ) : (
           <>
             <SearchBox
-              searchText={searchText}
-              onSearchChange={changeSearchText}
-              transmissionFilter={transmissionFilter}
-              onTransmissionChange={changeTransmissionFilter}
-              typeFilters={typeFilters}
-              onTypeChange={changeTypeFilters}
-              minPrice={minPrice}
-              onMinPriceChange={changeMinPrice}
-              maxPrice={maxPrice}
-              onMaxPriceChange={changeMaxPrice}
-              seatsFilter={seatsFilter}
-              onSeatsChange={changeSeatsFilter}
-              availableOnly={availableOnly}
-              onAvailableChange={changeAvailableOnly}
-              sortOrder={sortOrder}
-              onSortChange={changeSortOrder}
+              searchText={filters.search}
+              onSearchChange={(value) => dispatch({ type: "setSearch", value })}
+              transmissionFilter={filters.transmission}
+              onTransmissionChange={(value) =>
+                dispatch({ type: "setTransmission", value })
+              }
+              typeFilters={filters.types}
+              onTypeChange={(value) => dispatch({ type: "setTypes", value })}
+              minPrice={filters.minPrice}
+              onMinPriceChange={(value) =>
+                dispatch({ type: "setMinPrice", value })
+              }
+              maxPrice={filters.maxPrice}
+              onMaxPriceChange={(value) =>
+                dispatch({ type: "setMaxPrice", value })
+              }
+              seatsFilter={filters.seats}
+              onSeatsChange={(value) => dispatch({ type: "setSeats", value })}
+              availableOnly={filters.available}
+              onAvailableChange={(value) =>
+                dispatch({ type: "setAvailable", value })
+              }
+              favoritesOnly={filters.favoritesOnly}
+              onFavoritesOnlyChange={(value) =>
+                dispatch({ type: "setFavoritesOnly", value })
+              }
+              sortOrder={filters.sort}
+              onSortChange={(value) => dispatch({ type: "setSort", value })}
             />
 
             <p className={styles.counter}>
-              Showing {visibleCars.length} of {sortedCars.length} cars
+              Showing {visibleState.visibleCars.length} of{" "}
+              {visibleState.sortedCars.length} cars
             </p>
 
-            {sortedCars.length > 0 ? (
+            {visibleState.sortedCars.length > 0 ? (
               <>
-                <CarGrid cars={visibleCars} />
+                <CarGrid
+                  cars={visibleState.visibleCars}
+                  isFavorite={isFavorite}
+                  onFavoriteToggle={toggleFavorite}
+                />
                 <Pagination
-                  currentPage={safePage}
-                  pageCount={pageCount}
-                  onPageChange={setCurrentPage}
+                  currentPage={visibleState.safePage}
+                  pageCount={visibleState.pageCount}
+                  onPageChange={(value) => dispatch({ type: "setPage", value })}
                 />
               </>
             ) : (
               <FeedbackMessage
                 message="No cars match your search and filters."
                 actionLabel="Reset filters"
-                onAction={resetFilters}
+                onAction={() => dispatch({ type: "reset" })}
               />
             )}
           </>

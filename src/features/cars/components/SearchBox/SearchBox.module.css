@@ -3,7 +3,7 @@
   width: 100%;
   margin-bottom: 18px;
   padding: 20px;
-  gap: 16px;
+  gap: 20px;
   background-color: #ffffff;
   border: 1px solid #d9e2ec;
   border-radius: 8px;
@@ -12,15 +12,15 @@
 
 .filterGroup {
   display: grid;
-  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
   align-items: end;
-  gap: 14px;
+  gap: 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .searchField {
@@ -30,26 +30,38 @@
 .field label,
 .fieldLabel,
 .checkbox {
-  color: #1f2933;
-  font-size: 14px;
-  font-weight: 600;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .field input,
 .field select {
   width: 100%;
-  padding: 10px 0;
-  color: #1f2933;
-  font-size: 16px;
-  background-color: #ffffff;
+  min-height: 38px;
+  padding: 8px 0;
+  color: #12263a;
+  font-size: 15px;
+  background-color: transparent;
   border: none;
-  border-bottom: 2px solid #173a93;
+  border-bottom: 2px solid #1d4ed8;
+  border-radius: 0;
   outline: none;
+}
+
+.field select {
+  cursor: pointer;
+}
+
+.field select option {
+  color: #12263a;
+  background-color: #ffffff;
 }
 
 .field input:focus,
 .field select:focus {
-  border-bottom-color: #0f2d4d;
+  border-bottom-color: #082f49;
+  box-shadow: none;
 }
 
 .typeField {
@@ -60,7 +72,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  min-height: 42px;
+  min-height: 40px;
   align-items: center;
 }
 
@@ -68,7 +80,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 9px;
+  min-height: 36px;
+  padding: 7px 10px;
   color: #334155;
   font-size: 13px;
   font-weight: 600;
@@ -77,9 +90,16 @@
   border-radius: 6px;
 }
 
+.smallCheckbox:has(input:checked) {
+  color: #0f2d4d;
+  background-color: #e8f1f8;
+  border-color: #17406a;
+}
+
 .smallCheckbox input {
   width: 14px;
   height: 14px;
+  accent-color: #17406a;
 }
 
 .priceFields {
@@ -92,13 +112,23 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 38px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
   white-space: nowrap;
+}
+
+.checkbox:has(input:checked) {
+  color: #0f2d4d;
+  background-color: transparent;
 }
 
 .checkbox input {
   width: 16px;
   height: 16px;
+  accent-color: #17406a;
 }
 
 @media screen and (max-width: 1000px) {

@@ -1,6 +1,6 @@
 .message {
   width: 100%;
-  padding: 40px 16px;
+  padding: 42px 18px;
   color: #1f2933;
   text-align: center;
   background-color: #ffffff;
@@ -11,14 +11,14 @@
 .message p {
   margin: 0;
   color: #17324d;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .message button {
   margin-top: 16px;
   padding: 10px 16px;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 800;
   cursor: pointer;
   background-color: #17406a;
   border: none;

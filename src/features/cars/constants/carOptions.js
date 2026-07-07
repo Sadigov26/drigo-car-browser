@@ -16,6 +16,7 @@ export const DEFAULT_FILTERS = {
   maxPrice: "",
   seats: "All",
   available: false,
+  favoritesOnly: false,
   sort: "lowToHigh",
   page: 1,
 };

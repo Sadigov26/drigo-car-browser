@@ -3,12 +3,14 @@ import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackM
 import Footer from "../../components/layout/Footer/Footer";
 import Header from "../../components/layout/Header/Header";
 import { useCars } from "../../features/cars/hooks/useCars";
+import { useFavorites } from "../../features/cars/hooks/useFavorites";
 import styles from "./CarDetail.module.css";
 
 const CarDetail = () => {
   const { id } = useParams();
   const location = useLocation();
   const { data: cars, error, loading, retry } = useCars();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const car = cars.find((carItem) => carItem.id === Number(id));
   const backPath = location.state?.from || "/";
 
@@ -36,15 +38,28 @@ const CarDetail = () => {
                 <p className={styles.eyebrow}>Rental car details</p>
                 <div className={styles.headerRow}>
                   <h1>{car.name}</h1>
-                  <span
-                    className={
-                      car.available
-                        ? `${styles.badge} ${styles.available}`
-                        : `${styles.badge} ${styles.unavailable}`
-                    }
-                  >
-                    {car.available ? "Available" : "Unavailable"}
-                  </span>
+                  <div className={styles.statusBox}>
+                    <span
+                      className={
+                        car.available
+                          ? `${styles.badge} ${styles.available}`
+                          : `${styles.badge} ${styles.unavailable}`
+                      }
+                    >
+                      {car.available ? "Available" : "Unavailable"}
+                    </span>
+                    <button
+                      className={
+                        isFavorite(car.id)
+                          ? `${styles.favoriteButton} ${styles.favoriteButtonActive}`
+                          : styles.favoriteButton
+                      }
+                      type="button"
+                      onClick={() => toggleFavorite(car.id)}
+                    >
+                      <span>{isFavorite(car.id) ? "\u2605" : "\u2606"}</span>
+                    </button>
+                  </div>
                 </div>
                 <p className={styles.summaryText}>
                   {car.type} vehicle with {car.transmission.toLowerCase()}{" "}
@@ -52,13 +67,18 @@ const CarDetail = () => {
                 </p>
               </div>
 
-              <div className={styles.priceBox}>
-                <span>Daily price</span>
-                <strong>${car.pricePerDay}</strong>
-              </div>
             </section>
 
+            <div className={styles.priceBox}>
+              <span>Daily price</span>
+              <strong>${car.pricePerDay}</strong>
+            </div>
+
             <div className={styles.infoList}>
+              <p>
+                <strong>Car ID</strong>
+                <span>{car.id}</span>
+              </p>
               <p>
                 <strong>Type</strong>
                 <span>{car.type}</span>
@@ -71,14 +91,8 @@ const CarDetail = () => {
                 <strong>Seats</strong>
                 <span>{car.seats}</span>
               </p>
-              <p>
-                <strong>Price per day</strong>
-                <span>${car.pricePerDay}</span>
-              </p>
-              <p>
-                <strong>Car ID</strong>
-                <span>{car.id}</span>
-              </p>
+            
+              
             </div>
           </article>
         ) : (

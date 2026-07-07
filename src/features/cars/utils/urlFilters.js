@@ -41,6 +41,7 @@ export const getFilterValuesFromUrl = (searchParams) => {
   const maxPrice = getValidPriceParam(searchParams.get("maxPrice"));
   const seats = searchParams.get("seats") || DEFAULT_FILTERS.seats;
   const available = searchParams.get("available") === "true";
+  const favoritesOnly = searchParams.get("favorites") === "true";
   const sort = searchParams.get("sort") || DEFAULT_FILTERS.sort;
   const page = getValidPageParam(searchParams.get("page"));
 
@@ -54,6 +55,7 @@ export const getFilterValuesFromUrl = (searchParams) => {
     maxPrice,
     seats: SEAT_OPTIONS.includes(seats) ? seats : DEFAULT_FILTERS.seats,
     available,
+    favoritesOnly,
     sort: SORT_OPTIONS.includes(sort) ? sort : DEFAULT_FILTERS.sort,
     page,
   };
@@ -88,6 +90,10 @@ export const buildFilterSearchParams = (filters) => {
 
   if (filters.available) {
     nextParams.set("available", "true");
+  }
+
+  if (filters.favoritesOnly) {
+    nextParams.set("favorites", "true");
   }
 
   if (filters.sort !== DEFAULT_FILTERS.sort) {

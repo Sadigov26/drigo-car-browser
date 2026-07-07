@@ -2,38 +2,45 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 28px 20px;
-  background-color: #09335a;
+  padding: 30px 20px;
+  background-color: #082f49;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
-.header a{
-  text-decoration: none;
+
+.header a {
   color: #ffffff;
+  text-decoration: none;
 }
+
 .header h1 {
   margin: 0;
   color: #ffffff;
-  font-size: 34px;
+  font-size: 32px;
   line-height: 1.1;
 }
 
 .headerContent {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   width: min(1120px, 100%);
   gap: 24px;
 }
 
 .header p {
-  margin: 0;
-  color: #ffffff;
-  font-size: 16px;
+  max-width: 320px;
+  color: #cbd9e6;
+  font-size: 15px;
+  text-align: right;
 }
 
 @media screen and (max-width: 768px) {
   .headerContent {
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+  }
+
+  .header p {
+    text-align: left;
   }
 }

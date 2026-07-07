@@ -16,6 +16,8 @@ const SearchBox = ({
   onSeatsChange,
   availableOnly,
   onAvailableChange,
+  favoritesOnly,
+  onFavoritesOnlyChange,
   sortOrder,
   onSortChange,
 }) => {
@@ -133,6 +135,15 @@ const SearchBox = ({
             onChange={(event) => onAvailableChange(event.target.checked)}
           />
           Available only
+        </label>
+
+        <label className={styles.checkbox}>
+          <input
+            type="checkbox"
+            checked={favoritesOnly}
+            onChange={(event) => onFavoritesOnlyChange(event.target.checked)}
+          />
+          Favorites only
         </label>
       </div>
     </div>

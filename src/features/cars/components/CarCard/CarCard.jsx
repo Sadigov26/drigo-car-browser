@@ -1,27 +1,50 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./CarCard.module.css";
 
-function CarCard({ car, className = "" }) {
+function CarCard({ car, className = "", isFavorite, onFavoriteToggle }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const badgeClassName = car.available
     ? `${styles.badge} ${styles.badgeAvailable}`
     : `${styles.badge} ${styles.badgeUnavailable}`;
+  const detailPath = `/cars/${car.id}`;
+  const listPath = `${location.pathname}${location.search}`;
+
+  const openCarDetail = () => {
+    navigate(detailPath, { state: { from: listPath } });
+  };
+
+  const handleFavoriteClick = (event) => {
+    event.stopPropagation();
+    onFavoriteToggle(car.id);
+  };
 
   return (
-    <Link
-      className={`${styles.card} ${className}`}
-      to={`/cars/${car.id}`}
-      state={{ from: `${location.pathname}${location.search}` }}
-    >
+    <article className={`${styles.card} ${className}`} onClick={openCarDetail}>
       <div className={styles.cardTop}>
         <div>
           <p className={styles.type}>{car.type}</p>
           <h2 className={styles.title}>{car.name}</h2>
         </div>
-        <span className={badgeClassName}>
-          {car.available ? "Available" : "Unavailable"}
-        </span>
+
+        <div className={styles.cardStatus}>
+          <span className={badgeClassName}>
+            {car.available ? "Available" : "Unavailable"}
+          </span>
+          <button
+            className={
+              isFavorite
+                ? `${styles.favoriteButton} ${styles.favoriteButtonActive}`
+                : styles.favoriteButton
+            }
+            type="button"
+            onClick={handleFavoriteClick}
+          >
+            <span>{isFavorite ? "\u2605" : "\u2606"}</span>
+          </button>
+        </div>
       </div>
+
       <div className={styles.details}>
         <p>
           <strong>Type:</strong> {car.type}
@@ -36,7 +59,7 @@ function CarCard({ car, className = "" }) {
           <strong>Price/day:</strong> ${car.pricePerDay}
         </p>
       </div>
-    </Link>
+    </article>
   );
 }
 

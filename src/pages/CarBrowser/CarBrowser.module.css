@@ -13,13 +13,14 @@
   flex-direction: column;
   align-items: center;
   width: min(1120px, 100%);
-  padding: 24px 20px 40px;
+  padding: 24px 20px 42px;
 }
 
 .counter {
   width: 100%;
-  margin: 8px 0 20px;
-  color: #17324d;
-  font-weight: 600;
-  text-align: center;
+  margin: 6px 0 18px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
 }
