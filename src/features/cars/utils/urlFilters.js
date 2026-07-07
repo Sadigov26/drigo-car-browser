@@ -20,6 +20,16 @@ const getValidPriceParam = (value) => {
   return String(numberValue);
 };
 
+const getValidPageParam = (value) => {
+  const page = Number(value);
+
+  if (!Number.isInteger(page) || page < 1) {
+    return DEFAULT_FILTERS.page;
+  }
+
+  return page;
+};
+
 export const getFilterValuesFromUrl = (searchParams) => {
   const search = searchParams.get("search") || DEFAULT_FILTERS.search;
   const transmission =
@@ -32,6 +42,7 @@ export const getFilterValuesFromUrl = (searchParams) => {
   const seats = searchParams.get("seats") || DEFAULT_FILTERS.seats;
   const available = searchParams.get("available") === "true";
   const sort = searchParams.get("sort") || DEFAULT_FILTERS.sort;
+  const page = getValidPageParam(searchParams.get("page"));
 
   return {
     search,
@@ -44,6 +55,7 @@ export const getFilterValuesFromUrl = (searchParams) => {
     seats: SEAT_OPTIONS.includes(seats) ? seats : DEFAULT_FILTERS.seats,
     available,
     sort: SORT_OPTIONS.includes(sort) ? sort : DEFAULT_FILTERS.sort,
+    page,
   };
 };
 
@@ -80,6 +92,10 @@ export const buildFilterSearchParams = (filters) => {
 
   if (filters.sort !== DEFAULT_FILTERS.sort) {
     nextParams.set("sort", filters.sort);
+  }
+
+  if (filters.page !== DEFAULT_FILTERS.page) {
+    nextParams.set("page", String(filters.page));
   }
 
   return nextParams;

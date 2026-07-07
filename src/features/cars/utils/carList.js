@@ -41,6 +41,28 @@ export const sortCars = (cars, sortOrder) => {
       return secondCar.pricePerDay - firstCar.pricePerDay;
     }
 
+    if (sortOrder === "nameAZ") {
+      return firstCar.name.localeCompare(secondCar.name);
+    }
+
+    if (sortOrder === "nameZA") {
+      return secondCar.name.localeCompare(firstCar.name);
+    }
+
     return firstCar.pricePerDay - secondCar.pricePerDay;
   });
+};
+
+export const getPageCount = (itemsCount, pageSize) => {
+  return Math.max(1, Math.ceil(itemsCount / pageSize));
+};
+
+export const clampPage = (page, pageCount) => {
+  return Math.min(Math.max(page, 1), pageCount);
+};
+
+export const paginateCars = (cars, page, pageSize) => {
+  const startIndex = (page - 1) * pageSize;
+
+  return cars.slice(startIndex, startIndex + pageSize);
 };

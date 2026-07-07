@@ -113,7 +113,7 @@ const SearchBox = ({
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="sort">Sort by price</label>
+          <label htmlFor="sort">Sort</label>
           <select
             id="sort"
             value={sortOrder}
@@ -121,6 +121,8 @@ const SearchBox = ({
           >
             <option value="lowToHigh">Low to High</option>
             <option value="highToLow">High to Low</option>
+            <option value="nameAZ">Name A to Z</option>
+            <option value="nameZA">Name Z to A</option>
           </select>
         </div>
 

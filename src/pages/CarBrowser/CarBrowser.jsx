@@ -4,11 +4,21 @@ import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackM
 import Footer from "../../components/layout/Footer/Footer";
 import Header from "../../components/layout/Header/Header";
 import CarGrid from "../../features/cars/components/CarGrid/CarGrid";
+import Pagination from "../../features/cars/components/Pagination/Pagination";
 import SearchBox from "../../features/cars/components/SearchBox/SearchBox";
-import { DEFAULT_FILTERS } from "../../features/cars/constants/carOptions";
+import {
+  DEFAULT_FILTERS,
+  PAGE_SIZE,
+} from "../../features/cars/constants/carOptions";
 import { useCars } from "../../features/cars/hooks/useCars";
 import { useDebounce } from "../../features/cars/hooks/useDebounce";
-import { filterCars, sortCars } from "../../features/cars/utils/carList";
+import {
+  clampPage,
+  filterCars,
+  getPageCount,
+  paginateCars,
+  sortCars,
+} from "../../features/cars/utils/carList";
 import {
   buildFilterSearchParams,
   getFilterValuesFromUrl,
@@ -30,10 +40,26 @@ const CarBrowser = () => {
   const [seatsFilter, setSeatsFilter] = useState(urlValues.seats);
   const [availableOnly, setAvailableOnly] = useState(urlValues.available);
   const [sortOrder, setSortOrder] = useState(urlValues.sort);
+  const [currentPage, setCurrentPage] = useState(urlValues.page);
 
   const debouncedSearchText = useDebounce(searchText, 300);
   const debouncedMinPrice = useDebounce(minPrice, 300);
   const debouncedMaxPrice = useDebounce(maxPrice, 300);
+
+  const filteredCars = filterCars(cars, {
+    search: debouncedSearchText,
+    transmission: transmissionFilter,
+    types: typeFilters,
+    minPrice: debouncedMinPrice,
+    maxPrice: debouncedMaxPrice,
+    seats: seatsFilter,
+    available: availableOnly,
+  });
+
+  const sortedCars = sortCars(filteredCars, sortOrder);
+  const pageCount = getPageCount(sortedCars.length, PAGE_SIZE);
+  const safePage = clampPage(currentPage, pageCount);
+  const visibleCars = paginateCars(sortedCars, safePage, PAGE_SIZE);
 
   useEffect(() => {
     const nextParams = buildFilterSearchParams({
@@ -45,6 +71,7 @@ const CarBrowser = () => {
       seats: seatsFilter,
       available: availableOnly,
       sort: sortOrder,
+      page: safePage,
     });
 
     if (nextParams.toString() !== searchParams.toString()) {
@@ -59,9 +86,54 @@ const CarBrowser = () => {
     seatsFilter,
     availableOnly,
     sortOrder,
+    safePage,
     searchParams,
     setSearchParams,
   ]);
+
+  const resetPage = () => {
+    setCurrentPage(DEFAULT_FILTERS.page);
+  };
+
+  const changeSearchText = (value) => {
+    setSearchText(value);
+    resetPage();
+  };
+
+  const changeTransmissionFilter = (value) => {
+    setTransmissionFilter(value);
+    resetPage();
+  };
+
+  const changeTypeFilters = (value) => {
+    setTypeFilters(value);
+    resetPage();
+  };
+
+  const changeMinPrice = (value) => {
+    setMinPrice(value);
+    resetPage();
+  };
+
+  const changeMaxPrice = (value) => {
+    setMaxPrice(value);
+    resetPage();
+  };
+
+  const changeSeatsFilter = (value) => {
+    setSeatsFilter(value);
+    resetPage();
+  };
+
+  const changeAvailableOnly = (value) => {
+    setAvailableOnly(value);
+    resetPage();
+  };
+
+  const changeSortOrder = (value) => {
+    setSortOrder(value);
+    resetPage();
+  };
 
   const resetFilters = () => {
     setSearchText(DEFAULT_FILTERS.search);
@@ -72,19 +144,8 @@ const CarBrowser = () => {
     setSeatsFilter(DEFAULT_FILTERS.seats);
     setAvailableOnly(DEFAULT_FILTERS.available);
     setSortOrder(DEFAULT_FILTERS.sort);
+    setCurrentPage(DEFAULT_FILTERS.page);
   };
-
-  const filteredCars = filterCars(cars, {
-    search: debouncedSearchText,
-    transmission: transmissionFilter,
-    types: typeFilters,
-    minPrice: debouncedMinPrice,
-    maxPrice: debouncedMaxPrice,
-    seats: seatsFilter,
-    available: availableOnly,
-  });
-
-  const sortedCars = sortCars(filteredCars, sortOrder);
 
   return (
     <div className={styles.page}>
@@ -103,29 +164,36 @@ const CarBrowser = () => {
           <>
             <SearchBox
               searchText={searchText}
-              onSearchChange={setSearchText}
+              onSearchChange={changeSearchText}
               transmissionFilter={transmissionFilter}
-              onTransmissionChange={setTransmissionFilter}
+              onTransmissionChange={changeTransmissionFilter}
               typeFilters={typeFilters}
-              onTypeChange={setTypeFilters}
+              onTypeChange={changeTypeFilters}
               minPrice={minPrice}
-              onMinPriceChange={setMinPrice}
+              onMinPriceChange={changeMinPrice}
               maxPrice={maxPrice}
-              onMaxPriceChange={setMaxPrice}
+              onMaxPriceChange={changeMaxPrice}
               seatsFilter={seatsFilter}
-              onSeatsChange={setSeatsFilter}
+              onSeatsChange={changeSeatsFilter}
               availableOnly={availableOnly}
-              onAvailableChange={setAvailableOnly}
+              onAvailableChange={changeAvailableOnly}
               sortOrder={sortOrder}
-              onSortChange={setSortOrder}
+              onSortChange={changeSortOrder}
             />
 
             <p className={styles.counter}>
-              Showing {sortedCars.length} of {cars.length} cars
+              Showing {visibleCars.length} of {sortedCars.length} cars
             </p>
 
             {sortedCars.length > 0 ? (
-              <CarGrid cars={sortedCars} />
+              <>
+                <CarGrid cars={visibleCars} />
+                <Pagination
+                  currentPage={safePage}
+                  pageCount={pageCount}
+                  onPageChange={setCurrentPage}
+                />
+              </>
             ) : (
               <FeedbackMessage
                 message="No cars match your search and filters."
