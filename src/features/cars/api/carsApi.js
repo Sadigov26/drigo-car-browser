@@ -1,4 +1,4 @@
-import cars from "../data/cars.json";
+import cars from "../../../data/cars.json";
 
 const getRandomDelay = () => {
   return 800 + Math.floor(Math.random() * 401);

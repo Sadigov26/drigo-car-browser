@@ -1,14 +1,23 @@
+import { Link, useLocation } from "react-router-dom";
 import styles from "./CarCard.module.css";
 
 function CarCard({ car, className = "" }) {
+  const location = useLocation();
   const badgeClassName = car.available
     ? `${styles.badge} ${styles.badgeAvailable}`
     : `${styles.badge} ${styles.badgeUnavailable}`;
 
   return (
-    <div className={`${styles.card} ${className}`}>
+    <Link
+      className={`${styles.card} ${className}`}
+      to={`/cars/${car.id}`}
+      state={{ from: `${location.pathname}${location.search}` }}
+    >
       <div className={styles.cardTop}>
-        <h2 className={styles.title}>{car.name}</h2>
+        <div>
+          <p className={styles.type}>{car.type}</p>
+          <h2 className={styles.title}>{car.name}</h2>
+        </div>
         <span className={badgeClassName}>
           {car.available ? "Available" : "Unavailable"}
         </span>
@@ -27,7 +36,7 @@ function CarCard({ car, className = "" }) {
           <strong>Price/day:</strong> ${car.pricePerDay}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 

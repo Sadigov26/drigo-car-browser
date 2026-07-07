@@ -1,5 +1,5 @@
-import CarCard from '../CarCard/CarCard'
-import styles from './CarGrid.module.css'
+import CarCard from "../CarCard/CarCard";
+import styles from "./CarGrid.module.css";
 
 function CarGrid({ cars }) {
   return (
@@ -8,7 +8,7 @@ function CarGrid({ cars }) {
         <CarCard className={styles.card} key={car.id} car={car} />
       ))}
     </section>
-  )
+  );
 }
 
-export default CarGrid
+export default CarGrid;

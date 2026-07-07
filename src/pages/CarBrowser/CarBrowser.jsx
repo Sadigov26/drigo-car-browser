@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import CarGrid from "../../components/CarGrid/CarGrid";
-import FeedbackMessage from "../../components/FeedbackMessage/FeedbackMessage";
-import Footer from "../../components/Footer/Footer";
-import SearchBox from "../../components/SearchBox/SearchBox";
-import { DEFAULT_FILTERS } from "../../constants/carOptions";
-import { useCars } from "../../hooks/useCars";
-import { filterCars, sortCars } from "../../utils/carList";
+import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackMessage";
+import Footer from "../../components/layout/Footer/Footer";
+import Header from "../../components/layout/Header/Header";
+import CarGrid from "../../features/cars/components/CarGrid/CarGrid";
+import SearchBox from "../../features/cars/components/SearchBox/SearchBox";
+import { DEFAULT_FILTERS } from "../../features/cars/constants/carOptions";
+import { useCars } from "../../features/cars/hooks/useCars";
+import { useDebounce } from "../../features/cars/hooks/useDebounce";
+import { filterCars, sortCars } from "../../features/cars/utils/carList";
 import {
   buildFilterSearchParams,
   getFilterValuesFromUrl,
-} from "../../utils/urlFilters";
+} from "../../features/cars/utils/urlFilters";
 import styles from "./CarBrowser.module.css";
 
 const CarBrowser = () => {
@@ -20,31 +21,28 @@ const CarBrowser = () => {
   const urlValues = getFilterValuesFromUrl(searchParams);
 
   const [searchText, setSearchText] = useState(urlValues.search);
-  const [debouncedSearchText, setDebouncedSearchText] = useState(
-    urlValues.search,
-  );
   const [transmissionFilter, setTransmissionFilter] = useState(
     urlValues.transmission,
   );
-  const [typeFilter, setTypeFilter] = useState(urlValues.type);
+  const [typeFilters, setTypeFilters] = useState(urlValues.types);
+  const [minPrice, setMinPrice] = useState(urlValues.minPrice);
+  const [maxPrice, setMaxPrice] = useState(urlValues.maxPrice);
+  const [seatsFilter, setSeatsFilter] = useState(urlValues.seats);
   const [availableOnly, setAvailableOnly] = useState(urlValues.available);
   const [sortOrder, setSortOrder] = useState(urlValues.sort);
 
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      setDebouncedSearchText(searchText);
-    }, 300);
-
-    return () => {
-      clearTimeout(timerId);
-    };
-  }, [searchText]);
+  const debouncedSearchText = useDebounce(searchText, 300);
+  const debouncedMinPrice = useDebounce(minPrice, 300);
+  const debouncedMaxPrice = useDebounce(maxPrice, 300);
 
   useEffect(() => {
     const nextParams = buildFilterSearchParams({
       search: debouncedSearchText,
       transmission: transmissionFilter,
-      type: typeFilter,
+      types: typeFilters,
+      minPrice: debouncedMinPrice,
+      maxPrice: debouncedMaxPrice,
+      seats: seatsFilter,
       available: availableOnly,
       sort: sortOrder,
     });
@@ -55,7 +53,10 @@ const CarBrowser = () => {
   }, [
     debouncedSearchText,
     transmissionFilter,
-    typeFilter,
+    typeFilters,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+    seatsFilter,
     availableOnly,
     sortOrder,
     searchParams,
@@ -64,9 +65,11 @@ const CarBrowser = () => {
 
   const resetFilters = () => {
     setSearchText(DEFAULT_FILTERS.search);
-    setDebouncedSearchText(DEFAULT_FILTERS.search);
     setTransmissionFilter(DEFAULT_FILTERS.transmission);
-    setTypeFilter(DEFAULT_FILTERS.type);
+    setTypeFilters(DEFAULT_FILTERS.types);
+    setMinPrice(DEFAULT_FILTERS.minPrice);
+    setMaxPrice(DEFAULT_FILTERS.maxPrice);
+    setSeatsFilter(DEFAULT_FILTERS.seats);
     setAvailableOnly(DEFAULT_FILTERS.available);
     setSortOrder(DEFAULT_FILTERS.sort);
   };
@@ -74,7 +77,10 @@ const CarBrowser = () => {
   const filteredCars = filterCars(cars, {
     search: debouncedSearchText,
     transmission: transmissionFilter,
-    type: typeFilter,
+    types: typeFilters,
+    minPrice: debouncedMinPrice,
+    maxPrice: debouncedMaxPrice,
+    seats: seatsFilter,
     available: availableOnly,
   });
 
@@ -100,8 +106,14 @@ const CarBrowser = () => {
               onSearchChange={setSearchText}
               transmissionFilter={transmissionFilter}
               onTransmissionChange={setTransmissionFilter}
-              typeFilter={typeFilter}
-              onTypeChange={setTypeFilter}
+              typeFilters={typeFilters}
+              onTypeChange={setTypeFilters}
+              minPrice={minPrice}
+              onMinPriceChange={setMinPrice}
+              maxPrice={maxPrice}
+              onMaxPriceChange={setMaxPrice}
+              seatsFilter={seatsFilter}
+              onSeatsChange={setSeatsFilter}
               availableOnly={availableOnly}
               onAvailableChange={setAvailableOnly}
               sortOrder={sortOrder}
