@@ -2,34 +2,20 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import CarGrid from "../../components/CarGrid/CarGrid";
+import FeedbackMessage from "../../components/FeedbackMessage/FeedbackMessage";
 import Footer from "../../components/Footer/Footer";
 import SearchBox from "../../components/SearchBox/SearchBox";
-import cars from "../../data/cars.json";
+import { DEFAULT_FILTERS } from "../../constants/carOptions";
+import { useCars } from "../../hooks/useCars";
+import { filterCars, sortCars } from "../../utils/carList";
+import {
+  buildFilterSearchParams,
+  getFilterValuesFromUrl,
+} from "../../utils/urlFilters";
 import styles from "./CarBrowser.module.css";
 
-const transmissionOptions = ["All", "Automatic", "Manual"];
-const typeOptions = ["All", "Economy", "Sedan", "SUV", "Luxury"];
-const sortOptions = ["lowToHigh", "highToLow"];
-
-const getFilterValuesFromUrl = (searchParams) => {
-  const search = searchParams.get("search") || "";
-  const transmission = searchParams.get("transmission") || "All";
-  const type = searchParams.get("type") || "All";
-  const available = searchParams.get("available") === "true";
-  const sort = searchParams.get("sort") || "lowToHigh";
-
-  return {
-    search,
-    transmission: transmissionOptions.includes(transmission)
-      ? transmission
-      : "All",
-    type: typeOptions.includes(type) ? type : "All",
-    available,
-    sort: sortOptions.includes(sort) ? sort : "lowToHigh",
-  };
-};
-
 const CarBrowser = () => {
+  const { data: cars, error, loading, retry } = useCars();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlValues = getFilterValuesFromUrl(searchParams);
 
@@ -55,27 +41,13 @@ const CarBrowser = () => {
   }, [searchText]);
 
   useEffect(() => {
-    const nextParams = new URLSearchParams();
-
-    if (debouncedSearchText) {
-      nextParams.set("search", debouncedSearchText);
-    }
-
-    if (transmissionFilter !== "All") {
-      nextParams.set("transmission", transmissionFilter);
-    }
-
-    if (typeFilter !== "All") {
-      nextParams.set("type", typeFilter);
-    }
-
-    if (availableOnly) {
-      nextParams.set("available", "true");
-    }
-
-    if (sortOrder !== "lowToHigh") {
-      nextParams.set("sort", sortOrder);
-    }
+    const nextParams = buildFilterSearchParams({
+      search: debouncedSearchText,
+      transmission: transmissionFilter,
+      type: typeFilter,
+      available: availableOnly,
+      sort: sortOrder,
+    });
 
     if (nextParams.toString() !== searchParams.toString()) {
       setSearchParams(nextParams, { replace: true });
@@ -91,68 +63,65 @@ const CarBrowser = () => {
   ]);
 
   const resetFilters = () => {
-    setSearchText("");
-    setDebouncedSearchText("");
-    setTransmissionFilter("All");
-    setTypeFilter("All");
-    setAvailableOnly(false);
-    setSortOrder("lowToHigh");
+    setSearchText(DEFAULT_FILTERS.search);
+    setDebouncedSearchText(DEFAULT_FILTERS.search);
+    setTransmissionFilter(DEFAULT_FILTERS.transmission);
+    setTypeFilter(DEFAULT_FILTERS.type);
+    setAvailableOnly(DEFAULT_FILTERS.available);
+    setSortOrder(DEFAULT_FILTERS.sort);
   };
 
-  const filteredCars = cars.filter((car) => {
-    const matchesSearch = car.name
-      .toLowerCase()
-      .includes(debouncedSearchText.toLowerCase());
-
-    const matchesTransmission =
-      transmissionFilter === "All" || car.transmission === transmissionFilter;
-
-    const matchesType = typeFilter === "All" || car.type === typeFilter;
-    const matchesAvailability = !availableOnly || car.available;
-
-    return (
-      matchesSearch && matchesTransmission && matchesType && matchesAvailability
-    );
+  const filteredCars = filterCars(cars, {
+    search: debouncedSearchText,
+    transmission: transmissionFilter,
+    type: typeFilter,
+    available: availableOnly,
   });
 
-  const sortedCars = [...filteredCars].sort((firstCar, secondCar) => {
-    if (sortOrder === "highToLow") {
-      return secondCar.pricePerDay - firstCar.pricePerDay;
-    }
-
-    return firstCar.pricePerDay - secondCar.pricePerDay;
-  });
+  const sortedCars = sortCars(filteredCars, sortOrder);
 
   return (
     <div className={styles.page}>
       <Header />
       <div className={styles.searchContainer}>
-        <SearchBox
-          searchText={searchText}
-          onSearchChange={setSearchText}
-          transmissionFilter={transmissionFilter}
-          onTransmissionChange={setTransmissionFilter}
-          typeFilter={typeFilter}
-          onTypeChange={setTypeFilter}
-          availableOnly={availableOnly}
-          onAvailableChange={setAvailableOnly}
-          sortOrder={sortOrder}
-          onSortChange={setSortOrder}
-        />
-
-        <p className={styles.counter}>
-          Showing {sortedCars.length} of {cars.length} cars
-        </p>
-
-        {sortedCars.length > 0 ? (
-          <CarGrid cars={sortedCars} />
+        {loading ? (
+          <FeedbackMessage message="Loading cars..." />
+        ) : error ? (
+          <FeedbackMessage
+            tone="error"
+            message={error.message}
+            actionLabel="Retry"
+            onAction={retry}
+          />
         ) : (
-          <div className={styles.emptyState}>
-            <p>No cars match your search and filters.</p>
-            <button type="button" onClick={resetFilters}>
-              Reset filters
-            </button>
-          </div>
+          <>
+            <SearchBox
+              searchText={searchText}
+              onSearchChange={setSearchText}
+              transmissionFilter={transmissionFilter}
+              onTransmissionChange={setTransmissionFilter}
+              typeFilter={typeFilter}
+              onTypeChange={setTypeFilter}
+              availableOnly={availableOnly}
+              onAvailableChange={setAvailableOnly}
+              sortOrder={sortOrder}
+              onSortChange={setSortOrder}
+            />
+
+            <p className={styles.counter}>
+              Showing {sortedCars.length} of {cars.length} cars
+            </p>
+
+            {sortedCars.length > 0 ? (
+              <CarGrid cars={sortedCars} />
+            ) : (
+              <FeedbackMessage
+                message="No cars match your search and filters."
+                actionLabel="Reset filters"
+                onAction={resetFilters}
+              />
+            )}
+          </>
         )}
       </div>
       <Footer />

@@ -23,31 +23,3 @@
   font-weight: 600;
   text-align: center;
 }
-
-.emptyState {
-  width: 100%;
-  padding: 32px 16px;
-  color: #1f2933;
-  text-align: center;
-  background-color: #ffffff;
-  border-radius: 8px;
-}
-
-.emptyState p {
-  margin: 0 0 16px;
-  font-weight: 600;
-}
-
-.emptyState button {
-  padding: 10px 16px;
-  color: #ffffff;
-  font-weight: 600;
-  cursor: pointer;
-  background-color: #17406a;
-  border: none;
-  border-radius: 6px;
-}
-
-.emptyState button:hover {
-  background-color: #0f2d4d;
-}

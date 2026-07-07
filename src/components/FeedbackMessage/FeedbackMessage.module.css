@@ -1,0 +1,38 @@
+.message {
+  width: 100%;
+  padding: 40px 16px;
+  color: #1f2933;
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+}
+
+.message p {
+  margin: 0;
+  color: #17324d;
+  font-weight: 600;
+}
+
+.message button {
+  margin-top: 16px;
+  padding: 10px 16px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #17406a;
+  border: none;
+  border-radius: 6px;
+}
+
+.message button:hover {
+  background-color: #0f2d4d;
+}
+
+.error {
+  border-color: #f5b5b5;
+}
+
+.error p {
+  color: #b91c1c;
+}
