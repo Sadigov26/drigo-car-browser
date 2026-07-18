@@ -1,17 +1,33 @@
-# Decisions
+# Week 3 Decisions
 
-My async layer starts in `loading` because `useCars` begins with empty data and `loading: true`. The fake `getCars()` API waits about one second before resolving. If it resolves, the hook stores the cars and turns loading off. If it rejects, the hook stores the error, clears the data, and shows the error state with Retry. Retry resets the hook back to `data: []`, `error: null`, and `loading: true`, then changes a reload key so the effect runs the API call again. Empty state is different: it only appears after data loaded successfully but the current filters match zero cars.
+## 1. Mock data layer
 
-Cards open detail pages with React Router. The card navigates to `/cars/:id`, for example `/cars/6`. The detail page does not depend on state from the list; it reads the id from the URL, loads the cars through `useCars`, and finds the matching car. That means a fresh tab can load `/cars/6` directly. If no car matches the id, the page shows a clean not-found message instead of crashing.
+The mock data layer is in `src/api/mockApi.js`. It imports the car and initial booking JSON files, but components never import that data directly. It exposes `getCars(query)`, `getCar(id)`, `getBookings(user)`, `createBooking(data)`, and `cancelBooking(id)`. `runMockRequest` wraps every operation in a Promise, waits a random 600-1200ms, and rejects about 10% of requests. This makes loading and error states real without a backend. Cars remain seed data, while bookings are read from and written to localStorage. If stored booking data is missing or invalid, the layer safely falls back to the seed bookings.
 
-The filtered list view is preserved mostly through the URL. Search, filters, sort, and page are written into query params. When a card opens, it also passes the current list URL as `from` state. The detail back link uses that exact path, so the user returns to the same search, filters, sort, and page.
+## 2. Preventing stale results
 
-I used `useReducer` because this page has many related controls. Most changes also reset page back to 1, so a reducer keeps that rule in one place. Separate `useState`s would spread the same page-reset logic across many handlers.
+`useCars` creates an effect for the current query key and uses an `ignoreResult` flag. The effect cleanup changes that flag to true when the query changes or the component unmounts. For example, the user may search for "Toy" and quickly continue to "Toyota". The Toyota request can finish first even though it started later. Without the guard, the slower Toy response could arrive afterwards and replace the correct Toyota list. With the cleanup flag, the old callback sees that it is ignored and cannot update state. A unit test starts two requests and finishes them in reverse order to verify this behavior.
 
-On load, `CarBrowser` reads the query string with `useSearchParams`, validates values in `getFilterValuesFromUrl`, then uses those values as the reducer initial state. Bad values like unknown type, invalid sort, negative price, or bad page are ignored or clamped. After filtering and sorting, the page is clamped again if it is out of range, and the URL is rebuilt from the cleaned state.
+## 3. Cache and invalidation
 
-With one more day, I would add tests around URL parsing and page clamping. Those rules are important because reload and deep links depend on them, and small mistakes there can make the UI look fine until someone opens a copied URL.
+The cache is an in-memory pair of Maps: list results use a normalized query key and detail results use the car id. A cached result renders immediately, then the hook requests fresh data and shows a small updating state. Each request records the current cache version. Creating or cancelling a booking increments that version, clears list caches, and deletes the affected car detail cache. An older request from before invalidation cannot write its stale response because its version no longer matches. This keeps availability correct after mutations.
 
-## Week 3 app state
+## 4. Availability and overlap
 
-I chose React Context with `useReducer` because the signed-in user, bookings, and toast messages are needed on more than one page. Keeping them in one provider means the detail page and My Bookings use the same booking state. Creating and cancelling a booking can update that shared list immediately and roll it back if the mock API fails. The user is also saved in localStorage, so the protected route still recognizes them after reload. Browse search, filters, sort, and page do not belong in this context. They stay in the URL because users need to reload, copy, and revisit the exact same car list view.
+Overlap logic lives in the pure `bookingAvailability.js` utility, not in a component. Two ranges conflict when the first start is before the second end and the first end is after the second start. `findOverlappingBooking` also requires the same car id. The wizard uses this function for immediate feedback, and `createBooking` runs it again as the final authority. Keeping it pure makes the rule reusable and easy to unit-test. The API check is still required because UI validation alone can become outdated.
+
+## 5. App state
+
+I chose React Context with `useReducer`, without an external state library. The signed-in user, bookings, optimistic mutation state, and toast messages are shared by detail and booking pages, so they live in app state. The user and bookings are persisted in localStorage. Browse search, filters, sort, and page stay in the URL. They are validated when read and rebuilt from active values. This split means a copied or reloaded browse URL restores the exact view, while temporary application behavior does not make the URL noisy.
+
+## 6. Protected routes
+
+`RequireAuth` checks the shared user. When there is no user, it redirects to `/sign-in` and stores the attempted path in router location state. After successful validation, Sign In saves the user and navigates to that stored path with `replace: true`. Therefore opening `/bookings` while signed out returns to `/bookings`, instead of always going home, after sign-in.
+
+## 7. Accessibility and performance
+
+When the cancel dialog opens, focus moves to "Keep booking." Tab and Shift+Tab stay inside the dialog, Escape closes it, and focus returns to the Cancel button that opened it. Route and wizard step changes also move focus to the new heading. For performance, I measured cache behavior in the `useCars` test: cached cars are available before the fake 600ms timer advances, while an uncached request remains loading until the timer completes. This confirmed that back navigation can render cached content immediately and revalidate in the background.
+
+## 8. Next improvement
+
+With three more days, I would first add an integration test covering two almost simultaneous booking attempts for the same car and dates. The pure overlap tests and full booking test already cover normal behavior, but a concurrent mutation test would better protect the most important business rule and the optimistic rollback path together.
