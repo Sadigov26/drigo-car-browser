@@ -1,0 +1,71 @@
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.intro h3 {
+  margin: 0 0 6px;
+  color: #12263a;
+  font-size: 20px;
+}
+
+.intro p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field:last-child {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  color: #334e68;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px 2px;
+  color: #12263a;
+  font: inherit;
+  background-color: transparent;
+  border: 0;
+  border-bottom: 2px solid #9fb3c8;
+  border-radius: 0;
+}
+
+.field input:focus {
+  outline: 0;
+  border-bottom-color: #17406a;
+}
+
+.error {
+  min-height: 18px;
+  color: #b42318;
+  font-size: 13px;
+}
+
+@media screen and (max-width: 600px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+
+  .field:last-child {
+    grid-column: auto;
+  }
+}

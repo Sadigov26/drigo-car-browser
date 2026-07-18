@@ -1,0 +1,174 @@
+.wizard {
+  padding-top: 30px;
+  margin-top: 30px;
+  border-top: 2px solid #d9e2ec;
+}
+
+.wizardHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.wizardHeading p {
+  margin: 0 0 5px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.wizardHeading h2 {
+  margin: 0;
+  color: #12263a;
+  font-size: 26px;
+}
+
+.wizardHeading > span {
+  color: #52606d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 28px;
+  list-style: none;
+}
+
+.steps li {
+  padding: 9px 4px;
+  color: #7b8794;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 3px solid #d9e2ec;
+}
+
+.steps .activeStep {
+  color: #17406a;
+  border-bottom-color: #17406a;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 24px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-width: 120px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.primaryButton {
+  color: #ffffff;
+  background-color: #17406a;
+  border: 1px solid #17406a;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background-color: #0f2d4d;
+}
+
+.primaryButton:disabled {
+  color: #f1f5f9;
+  cursor: not-allowed;
+  background-color: #94a3b8;
+  border-color: #94a3b8;
+}
+
+.secondaryButton {
+  color: #17406a;
+  background-color: #ffffff;
+  border: 1px solid #9fb3c8;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background-color: #f2f7fb;
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.submitError,
+.unavailableMessage {
+  padding: 12px 14px;
+  margin: 20px 0 0;
+  color: #9f1239;
+  font-size: 14px;
+  background-color: #fff1f2;
+  border-left: 4px solid #be123c;
+}
+
+.unavailableMessage {
+  margin-top: 12px;
+}
+
+.successMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  color: #14532d;
+  background-color: #f0fdf4;
+  border-left: 4px solid #16a34a;
+}
+
+.successMark {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+  font-weight: 700;
+  background-color: #15803d;
+  border-radius: 50%;
+}
+
+.successMessage h2 {
+  margin: 0 0 5px;
+  font-size: 22px;
+}
+
+.successMessage p {
+  margin: 0 0 8px;
+  color: #166534;
+}
+
+.successMessage small {
+  overflow-wrap: anywhere;
+}
+
+@media screen and (max-width: 500px) {
+  .wizardHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}

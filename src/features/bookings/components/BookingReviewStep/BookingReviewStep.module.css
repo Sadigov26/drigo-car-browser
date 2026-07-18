@@ -1,0 +1,78 @@
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.intro h3 {
+  margin: 0 0 6px;
+  color: #12263a;
+  font-size: 20px;
+}
+
+.intro p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.reviewList {
+  margin: 0;
+  border-top: 1px solid #d9e2ec;
+}
+
+.reviewList div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid #d9e2ec;
+}
+
+.reviewList dt {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.reviewList dd {
+  margin: 0;
+  color: #12263a;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.priceLines {
+  padding: 16px;
+  background-color: #f2f7fb;
+  border-left: 4px solid #17406a;
+}
+
+.priceLines p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 5px 0;
+  color: #52606d;
+}
+
+.priceLines strong {
+  color: #12263a;
+}
+
+.priceLines .total {
+  padding-top: 12px;
+  margin-top: 8px;
+  color: #09335a;
+  font-size: 18px;
+  font-weight: 700;
+  border-top: 1px solid #cbd5e1;
+}
+
+@media screen and (max-width: 500px) {
+  .reviewList div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

@@ -116,12 +116,6 @@ const CarBrowser = () => {
     <div className={styles.page}>
       <Header />
       <div className={styles.searchContainer}>
-        {updating && (
-          <p className={styles.updateStatus} role="status">
-            Updating results...
-          </p>
-        )}
-
         {error && hasData && (
           <div className={styles.refreshError}>
             <span>{error.message}</span>
@@ -173,9 +167,23 @@ const CarBrowser = () => {
               onSortChange={(value) => dispatch({ type: "setSort", value })}
             />
 
-            <p className={styles.counter}>
-              Showing {cars.length} of {total} cars
-            </p>
+            <div className={styles.resultsRow}>
+              <p className={styles.counter}>
+                Showing {cars.length} of {total} cars
+              </p>
+              <div
+                className={styles.updateStatus}
+                role="status"
+                aria-live="polite"
+              >
+                {updating && (
+                  <>
+                    <span className={styles.spinner} aria-hidden="true" />
+                    <span>Updating</span>
+                  </>
+                )}
+              </div>
+            </div>
 
             {total > 0 ? (
               <>

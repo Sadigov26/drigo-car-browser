@@ -1,0 +1,250 @@
+import { useMemo, useReducer } from "react";
+import { createBooking } from "../../../../api/mockApi";
+import { BOOKING_STEPS } from "../../constants/bookingOptions";
+import {
+  bookingWizardReducer,
+  createInitialBookingState,
+} from "../../reducers/bookingWizardReducer";
+import {
+  calculateBookingPrice,
+  getTodayDateString,
+  hasValidationErrors,
+  validateDateRange,
+  validateDriverDetails,
+} from "../../utils/bookingValidation";
+import BookingReviewStep from "../BookingReviewStep/BookingReviewStep";
+import DateRangeStep from "../DateRangeStep/DateRangeStep";
+import DriverDetailsStep from "../DriverDetailsStep/DriverDetailsStep";
+import styles from "./BookingWizard.module.css";
+
+const dateFields = { startDate: true, endDate: true };
+const driverFields = {
+  fullName: true,
+  email: true,
+  licenseNumber: true,
+};
+
+const getVisibleErrors = (errors, touched) => {
+  return Object.fromEntries(
+    Object.entries(errors).filter(([field]) => touched[field]),
+  );
+};
+
+const BookingWizard = ({ car, onBookingCreated, user }) => {
+  const [state, dispatch] = useReducer(
+    bookingWizardReducer,
+    user,
+    createInitialBookingState,
+  );
+  const today = getTodayDateString();
+  const dateErrors = useMemo(
+    () =>
+      validateDateRange(
+        { startDate: state.startDate, endDate: state.endDate },
+        today,
+      ),
+    [state.startDate, state.endDate, today],
+  );
+  const driverErrors = useMemo(
+    () => validateDriverDetails(state.driver),
+    [state.driver],
+  );
+  const price = useMemo(
+    () =>
+      calculateBookingPrice(
+        state.startDate,
+        state.endDate,
+        car.pricePerDay,
+      ),
+    [car.pricePerDay, state.endDate, state.startDate],
+  );
+  const bookingIsValid =
+    !hasValidationErrors(dateErrors) &&
+    !hasValidationErrors(driverErrors) &&
+    price.days > 0;
+
+  const handleDateChange = (event) => {
+    dispatch({
+      type: "changeDate",
+      name: event.target.name,
+      value: event.target.value,
+    });
+  };
+
+  const handleDriverChange = (event) => {
+    dispatch({
+      type: "changeDriver",
+      name: event.target.name,
+      value: event.target.value,
+    });
+  };
+
+  const handleContinue = () => {
+    if (state.step === BOOKING_STEPS.DATES) {
+      dispatch({ type: "touchFields", fields: dateFields });
+
+      if (!hasValidationErrors(dateErrors)) {
+        dispatch({ type: "nextStep" });
+      }
+
+      return;
+    }
+
+    dispatch({ type: "touchFields", fields: driverFields });
+
+    if (!hasValidationErrors(driverErrors)) {
+      dispatch({ type: "nextStep" });
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!bookingIsValid || state.submitting) {
+      return;
+    }
+
+    dispatch({ type: "submitStart" });
+
+    try {
+      const booking = await createBooking({
+        carId: car.id,
+        carName: car.name,
+        startDate: state.startDate,
+        endDate: state.endDate,
+        driver: state.driver.fullName,
+        driverDetails: { ...state.driver },
+        userEmail: user?.email || state.driver.email,
+        days: price.days,
+        rentalCost: price.rentalCost,
+        serviceFee: price.serviceFee,
+        totalPrice: price.total,
+        status: "upcoming",
+        createdAt: new Date().toISOString(),
+      });
+
+      dispatch({ type: "submitSuccess", booking });
+      onBookingCreated?.(booking);
+    } catch (error) {
+      dispatch({ type: "submitError", message: error.message });
+    }
+  };
+
+  if (!car.available) {
+    return (
+      <section className={styles.wizard}>
+        <h2>Book this car</h2>
+        <p className={styles.unavailableMessage}>
+          This car is currently unavailable for booking.
+        </p>
+      </section>
+    );
+  }
+
+  if (state.booking) {
+    return (
+      <section className={styles.wizard}>
+        <div className={styles.successMessage}>
+          <span className={styles.successMark}>OK</span>
+          <div>
+            <h2>Booking confirmed</h2>
+            <p>
+              {car.name} is booked from {state.startDate} to {state.endDate}.
+            </p>
+            <small>Booking ID: {state.booking.id}</small>
+          </div>
+        </div>
+        <button
+          className={styles.secondaryButton}
+          type="button"
+          onClick={() => dispatch({ type: "restart", user })}
+        >
+          Book another date
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.wizard}>
+      <div className={styles.wizardHeading}>
+        <div>
+          <p>Reservation</p>
+          <h2>Book this car</h2>
+        </div>
+        <span>Step {state.step} of 3</span>
+      </div>
+
+      <ol className={styles.steps}>
+        <li className={state.step >= 1 ? styles.activeStep : ""}>Dates</li>
+        <li className={state.step >= 2 ? styles.activeStep : ""}>Driver</li>
+        <li className={state.step >= 3 ? styles.activeStep : ""}>Review</li>
+      </ol>
+
+      {state.step === BOOKING_STEPS.DATES && (
+        <DateRangeStep
+          startDate={state.startDate}
+          endDate={state.endDate}
+          today={today}
+          price={price}
+          errors={getVisibleErrors(dateErrors, state.touched)}
+          onChange={handleDateChange}
+        />
+      )}
+
+      {state.step === BOOKING_STEPS.DRIVER && (
+        <DriverDetailsStep
+          driver={state.driver}
+          errors={getVisibleErrors(driverErrors, state.touched)}
+          onChange={handleDriverChange}
+        />
+      )}
+
+      {state.step === BOOKING_STEPS.REVIEW && (
+        <BookingReviewStep
+          car={car}
+          driver={state.driver}
+          startDate={state.startDate}
+          endDate={state.endDate}
+          price={price}
+        />
+      )}
+
+      {state.submitError && (
+        <div className={styles.submitError}>{state.submitError}</div>
+      )}
+
+      <div className={styles.actions}>
+        {state.step > BOOKING_STEPS.DATES && (
+          <button
+            className={styles.secondaryButton}
+            type="button"
+            onClick={() => dispatch({ type: "previousStep" })}
+            disabled={state.submitting}
+          >
+            Back
+          </button>
+        )}
+
+        {state.step < BOOKING_STEPS.REVIEW ? (
+          <button
+            className={styles.primaryButton}
+            type="button"
+            onClick={handleContinue}
+          >
+            Continue
+          </button>
+        ) : (
+          <button
+            className={styles.primaryButton}
+            type="button"
+            onClick={handleSubmit}
+            disabled={!bookingIsValid || state.submitting}
+          >
+            {state.submitting ? "Confirming..." : "Confirm booking"}
+          </button>
+        )}
+      </div>
+    </section>
+  );
+};
+
+export default BookingWizard;

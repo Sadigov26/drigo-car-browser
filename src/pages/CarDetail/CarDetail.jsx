@@ -2,6 +2,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackMessage";
 import Footer from "../../components/layout/Footer/Footer";
 import Header from "../../components/layout/Header/Header";
+import BookingWizard from "../../features/bookings/components/BookingWizard/BookingWizard";
 import { useCar } from "../../features/cars/hooks/useCar";
 import { useFavorites } from "../../features/cars/hooks/useFavorites";
 import styles from "./CarDetail.module.css";
@@ -24,12 +25,6 @@ const CarDetail = () => {
     <div className={styles.page}>
       <Header />
       <main className={styles.detailContainer}>
-        {updating && (
-          <p className={styles.updateStatus} role="status">
-            Updating car details...
-          </p>
-        )}
-
         {error && hasData && (
           <div className={styles.refreshError}>
             <span>{error.message}</span>
@@ -50,9 +45,23 @@ const CarDetail = () => {
           />
         ) : car ? (
           <article className={styles.detailCard}>
-            <Link className={styles.backLink} to={backPath}>
-              Back to results
-            </Link>
+            <div className={styles.detailTopBar}>
+              <Link className={styles.backLink} to={backPath}>
+                Back to results
+              </Link>
+              <div
+                className={styles.updateStatus}
+                role="status"
+                aria-live="polite"
+              >
+                {updating && (
+                  <>
+                    <span className={styles.spinner} aria-hidden="true" />
+                    <span>Updating</span>
+                  </>
+                )}
+              </div>
+            </div>
 
             <section className={styles.summary}>
               <div>
@@ -112,9 +121,8 @@ const CarDetail = () => {
                 <strong>Seats</strong>
                 <span>{car.seats}</span>
               </p>
-            
-              
             </div>
+            <BookingWizard car={car} onBookingCreated={retry} />
           </article>
         ) : (
           <div className={styles.notFound}>
