@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BOOKINGS_STORAGE_KEY } from "../../../../api/mockApi";
 import AppProvider from "../../../../context/AppContext/AppProvider";
@@ -20,9 +20,11 @@ describe("BookingWizard", () => {
     vi.setSystemTime(new Date("2026-07-18T12:00:00"));
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     localStorage.removeItem(BOOKINGS_STORAGE_KEY);
+    sessionStorage.clear();
   });
 
   afterEach(() => {
+    cleanup();
     vi.restoreAllMocks();
     vi.useRealTimers();
   });
@@ -116,5 +118,51 @@ describe("BookingWizard", () => {
       ),
     ).toBeTruthy();
     expect(screen.getByText("Choose your rental dates")).toBeTruthy();
+  });
+
+  it("restores an unfinished booking after the wizard remounts", async () => {
+    const firstRender = render(
+      <AppProvider>
+        <BookingWizard car={car} />
+      </AppProvider>,
+    );
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+
+    fireEvent.change(screen.getByLabelText("Start date"), {
+      target: { value: "2026-08-10" },
+    });
+    fireEvent.change(screen.getByLabelText("End date"), {
+      target: { value: "2026-08-12" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.change(screen.getByLabelText("Full name"), {
+      target: { value: "Saved Driver" },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "saved@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Driver license number"), {
+      target: { value: "AZE7654321" },
+    });
+
+    firstRender.unmount();
+
+    render(
+      <AppProvider>
+        <BookingWizard car={car} />
+      </AppProvider>,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Driver details" }),
+    ).toBeTruthy();
+    expect(screen.getByLabelText("Full name").value).toBe("Saved Driver");
+    expect(screen.getByLabelText("Email").value).toBe("saved@example.com");
+    expect(screen.getByLabelText("Driver license number").value).toBe(
+      "AZE7654321",
+    );
   });
 });

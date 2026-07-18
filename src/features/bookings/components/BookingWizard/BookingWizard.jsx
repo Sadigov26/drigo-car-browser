@@ -14,6 +14,11 @@ import {
   validateDriverDetails,
 } from "../../utils/bookingValidation";
 import { findOverlappingBooking } from "../../utils/bookingAvailability";
+import {
+  clearBookingDraft,
+  readBookingDraft,
+  saveBookingDraft,
+} from "../../utils/bookingDraft";
 import BookingReviewStep from "../BookingReviewStep/BookingReviewStep";
 import DateRangeStep from "../DateRangeStep/DateRangeStep";
 import DriverDetailsStep from "../DriverDetailsStep/DriverDetailsStep";
@@ -32,13 +37,31 @@ const getVisibleErrors = (errors, touched) => {
   );
 };
 
+const createBookingWizardState = ({ carId, user }) => {
+  const initialState = createInitialBookingState(user);
+  const savedDraft = readBookingDraft(carId, user?.email);
+
+  if (!savedDraft) {
+    return initialState;
+  }
+
+  return {
+    ...initialState,
+    ...savedDraft,
+    driver: {
+      ...initialState.driver,
+      ...savedDraft.driver,
+    },
+  };
+};
+
 const BookingWizard = ({ car, onBookingCreated }) => {
   const { createBooking, user } = useAppContext();
   const wizardRef = useRef(null);
   const [state, dispatch] = useReducer(
     bookingWizardReducer,
-    user,
-    createInitialBookingState,
+    { carId: car.id, user },
+    createBookingWizardState,
   );
   const {
     addOptimisticBooking,
@@ -95,6 +118,28 @@ const BookingWizard = ({ car, onBookingCreated }) => {
       wizardRef.current?.querySelector("[data-booking-focus]");
     currentHeading?.focus();
   }, [state.booking, state.step]);
+
+  useEffect(() => {
+    if (state.booking) {
+      clearBookingDraft(car.id, user?.email);
+      return;
+    }
+
+    saveBookingDraft(car.id, user?.email, {
+      step: state.step,
+      startDate: state.startDate,
+      endDate: state.endDate,
+      driver: state.driver,
+    });
+  }, [
+    car.id,
+    state.booking,
+    state.driver,
+    state.endDate,
+    state.startDate,
+    state.step,
+    user?.email,
+  ]);
 
   const handleDateChange = (event) => {
     dispatch({
@@ -175,6 +220,11 @@ const BookingWizard = ({ car, onBookingCreated }) => {
     }
   };
 
+  const handleRestart = () => {
+    clearBookingDraft(car.id, user?.email);
+    dispatch({ type: "restart", user });
+  };
+
   if (!car.available) {
     return (
       <section ref={wizardRef} className={styles.wizard}>
@@ -208,7 +258,7 @@ const BookingWizard = ({ car, onBookingCreated }) => {
         <button
           className={styles.secondaryButton}
           type="button"
-          onClick={() => dispatch({ type: "restart", user })}
+          onClick={handleRestart}
           disabled={state.submitting}
         >
           Book another date
