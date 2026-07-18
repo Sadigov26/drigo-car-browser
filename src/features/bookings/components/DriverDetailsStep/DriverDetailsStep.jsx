@@ -2,10 +2,19 @@ import styles from "./DriverDetailsStep.module.css";
 
 const DriverDetailsStep = ({ driver, errors, onChange }) => {
   return (
-    <div className={styles.stepContent}>
+    <div
+      className={styles.stepContent}
+      role="group"
+      aria-labelledby="driver-details-heading"
+      aria-describedby="driver-details-help"
+    >
       <div className={styles.intro}>
-        <h3>Driver details</h3>
-        <p>Enter the details of the person who will drive the car.</p>
+        <h3 id="driver-details-heading" tabIndex="-1" data-booking-focus>
+          Driver details
+        </h3>
+        <p id="driver-details-help">
+          Enter the details of the person who will drive the car.
+        </p>
       </div>
 
       <div className={styles.fields}>
@@ -18,9 +27,17 @@ const DriverDetailsStep = ({ driver, errors, onChange }) => {
             value={driver.fullName}
             onChange={onChange}
             placeholder="Example: Kamil Sadigov"
+            aria-invalid={Boolean(errors.fullName)}
+            aria-describedby={
+              errors.fullName
+                ? "driver-name-error driver-details-help"
+                : "driver-details-help"
+            }
           />
           {errors.fullName && (
-            <span className={styles.error}>{errors.fullName}</span>
+            <span id="driver-name-error" className={styles.error}>
+              {errors.fullName}
+            </span>
           )}
         </div>
 
@@ -33,9 +50,17 @@ const DriverDetailsStep = ({ driver, errors, onChange }) => {
             value={driver.email}
             onChange={onChange}
             placeholder="name@example.com"
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={
+              errors.email
+                ? "driver-email-error driver-details-help"
+                : "driver-details-help"
+            }
           />
           {errors.email && (
-            <span className={styles.error}>{errors.email}</span>
+            <span id="driver-email-error" className={styles.error}>
+              {errors.email}
+            </span>
           )}
         </div>
 
@@ -48,9 +73,17 @@ const DriverDetailsStep = ({ driver, errors, onChange }) => {
             value={driver.licenseNumber}
             onChange={onChange}
             placeholder="Example: AZE1234567"
+            aria-invalid={Boolean(errors.licenseNumber)}
+            aria-describedby={
+              errors.licenseNumber
+                ? "driver-license-error driver-details-help"
+                : "driver-details-help"
+            }
           />
           {errors.licenseNumber && (
-            <span className={styles.error}>{errors.licenseNumber}</span>
+            <span id="driver-license-error" className={styles.error}>
+              {errors.licenseNumber}
+            </span>
           )}
         </div>
       </div>

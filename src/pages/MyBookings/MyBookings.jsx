@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackMessage";
 import Footer from "../../components/layout/Footer/Footer";
 import Header from "../../components/layout/Header/Header";
@@ -18,19 +18,27 @@ const MyBookings = () => {
     retryBookings,
   } = useAppContext();
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const pageHeadingRef = useRef(null);
   const bookingGroups = useMemo(
     () => splitBookingsByDate(bookings, getTodayDateString()),
     [bookings],
   );
 
   const closeDialog = useCallback(() => {
+    const trigger = selectedBooking?.trigger;
     setSelectedBooking(null);
+    requestAnimationFrame(() => trigger?.focus());
+  }, [selectedBooking]);
+
+  const openDialog = useCallback((booking, trigger) => {
+    setSelectedBooking({ booking, trigger });
   }, []);
 
   const confirmCancellation = async () => {
-    const bookingId = selectedBooking.id;
+    const bookingId = selectedBooking.booking.id;
 
-    closeDialog();
+    setSelectedBooking(null);
+    requestAnimationFrame(() => pageHeadingRef.current?.focus());
 
     try {
       await cancelBooking(bookingId);
@@ -55,7 +63,7 @@ const MyBookings = () => {
             key={booking.id}
             booking={booking}
             canCancel={canCancel}
-            onCancel={setSelectedBooking}
+            onCancel={openDialog}
           />
         ))}
       </div>
@@ -68,7 +76,9 @@ const MyBookings = () => {
       <main className={styles.container}>
         <div className={styles.pageHeading}>
           <p>Reservations</p>
-          <h1>My Bookings</h1>
+          <h1 ref={pageHeadingRef} tabIndex="-1">
+            My Bookings
+          </h1>
           <span>View and manage your rental history.</span>
         </div>
 
@@ -107,7 +117,7 @@ const MyBookings = () => {
 
       {selectedBooking && (
         <ConfirmDialog
-          booking={selectedBooking}
+          booking={selectedBooking.booking}
           onCancel={closeDialog}
           onConfirm={confirmCancellation}
         />

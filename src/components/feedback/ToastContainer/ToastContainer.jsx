@@ -20,7 +20,7 @@ const Toast = ({ toast, onRemove }) => {
           ? `${styles.toast} ${styles.errorToast}`
           : `${styles.toast} ${styles.successToast}`
       }
-      role="status"
+      role={toast.tone === "error" ? "alert" : "status"}
     >
       <span>{toast.message}</span>
       <button type="button" onClick={() => onRemove(toast.id)}>

@@ -38,6 +38,10 @@ describe("BookingWizard", () => {
       await vi.runAllTimersAsync();
     });
 
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { name: "Choose your rental dates" }),
+    );
+
     fireEvent.change(screen.getByLabelText("Start date"), {
       target: { value: "2026-08-10" },
     });
@@ -46,7 +50,9 @@ describe("BookingWizard", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(screen.getByText("Driver details")).toBeTruthy();
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { name: "Driver details" }),
+    );
 
     fireEvent.change(screen.getByLabelText("Full name"), {
       target: { value: "Sadig Sadigov" },
@@ -59,7 +65,9 @@ describe("BookingWizard", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(screen.getByText("Review your booking")).toBeTruthy();
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", { name: "Review your booking" }),
+    );
     expect(screen.getByText("$95")).toBeTruthy();
 
     fireEvent.click(

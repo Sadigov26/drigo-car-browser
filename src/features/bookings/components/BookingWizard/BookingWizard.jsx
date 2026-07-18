@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 import { useAppContext } from "../../../../context/AppContext/useAppContext";
 import { BOOKING_STEPS } from "../../constants/bookingOptions";
 import { useCarBookings } from "../../hooks/useCarBookings";
@@ -34,6 +34,7 @@ const getVisibleErrors = (errors, touched) => {
 
 const BookingWizard = ({ car, onBookingCreated }) => {
   const { createBooking, user } = useAppContext();
+  const wizardRef = useRef(null);
   const [state, dispatch] = useReducer(
     bookingWizardReducer,
     user,
@@ -88,6 +89,12 @@ const BookingWizard = ({ car, onBookingCreated }) => {
     !availabilityLoading &&
     !availabilityError &&
     price.days > 0;
+
+  useEffect(() => {
+    const currentHeading =
+      wizardRef.current?.querySelector("[data-booking-focus]");
+    currentHeading?.focus();
+  }, [state.booking, state.step]);
 
   const handleDateChange = (event) => {
     dispatch({
@@ -170,8 +177,10 @@ const BookingWizard = ({ car, onBookingCreated }) => {
 
   if (!car.available) {
     return (
-      <section className={styles.wizard}>
-        <h2>Book this car</h2>
+      <section ref={wizardRef} className={styles.wizard}>
+        <h2 tabIndex="-1" data-booking-focus>
+          Book this car
+        </h2>
         <p className={styles.unavailableMessage}>
           This car is currently unavailable for booking.
         </p>
@@ -181,11 +190,13 @@ const BookingWizard = ({ car, onBookingCreated }) => {
 
   if (state.booking) {
     return (
-      <section className={styles.wizard}>
+      <section ref={wizardRef} className={styles.wizard}>
         <div className={styles.successMessage}>
           <span className={styles.successMark}>OK</span>
           <div>
-            <h2>Booking confirmed</h2>
+            <h2 tabIndex="-1" data-booking-focus>
+              Booking confirmed
+            </h2>
             <p>{car.name} is booked from {state.startDate} to {state.endDate}.</p>
             {state.submitting ? (
               <small>Saving booking...</small>
@@ -207,19 +218,38 @@ const BookingWizard = ({ car, onBookingCreated }) => {
   }
 
   return (
-    <section className={styles.wizard}>
+    <section
+      ref={wizardRef}
+      className={styles.wizard}
+      aria-labelledby="booking-wizard-title"
+    >
       <div className={styles.wizardHeading}>
         <div>
           <p>Reservation</p>
-          <h2>Book this car</h2>
+          <h2 id="booking-wizard-title">Book this car</h2>
         </div>
         <span>Step {state.step} of 3</span>
       </div>
 
-      <ol className={styles.steps}>
-        <li className={state.step >= 1 ? styles.activeStep : ""}>Dates</li>
-        <li className={state.step >= 2 ? styles.activeStep : ""}>Driver</li>
-        <li className={state.step >= 3 ? styles.activeStep : ""}>Review</li>
+      <ol className={styles.steps} aria-label="Booking progress">
+        <li
+          className={state.step >= 1 ? styles.activeStep : ""}
+          aria-current={state.step === 1 ? "step" : undefined}
+        >
+          Dates
+        </li>
+        <li
+          className={state.step >= 2 ? styles.activeStep : ""}
+          aria-current={state.step === 2 ? "step" : undefined}
+        >
+          Driver
+        </li>
+        <li
+          className={state.step >= 3 ? styles.activeStep : ""}
+          aria-current={state.step === 3 ? "step" : undefined}
+        >
+          Review
+        </li>
       </ol>
 
       {state.step === BOOKING_STEPS.DATES && (

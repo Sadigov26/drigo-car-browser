@@ -36,7 +36,7 @@ const BookingCard = ({ booking, canCancel, onCancel }) => {
         <button
           className={styles.cancelButton}
           type="button"
-          onClick={() => onCancel(booking)}
+          onClick={(event) => onCancel(booking, event.currentTarget)}
         >
           Cancel
         </button>

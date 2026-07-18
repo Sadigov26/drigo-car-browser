@@ -3,6 +3,7 @@ import styles from "./ConfirmDialog.module.css";
 
 const ConfirmDialog = ({ booking, onCancel, onConfirm }) => {
   const cancelButtonRef = useRef(null);
+  const confirmButtonRef = useRef(null);
 
   useEffect(() => {
     cancelButtonRef.current?.focus();
@@ -10,6 +11,20 @@ const ConfirmDialog = ({ booking, onCancel, onConfirm }) => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onCancel();
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === cancelButtonRef.current) {
+        event.preventDefault();
+        confirmButtonRef.current?.focus();
+      }
+
+      if (!event.shiftKey && document.activeElement === confirmButtonRef.current) {
+        event.preventDefault();
+        cancelButtonRef.current?.focus();
       }
     };
 
@@ -27,9 +42,10 @@ const ConfirmDialog = ({ booking, onCancel, onConfirm }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="cancel-booking-title"
+        aria-describedby="cancel-booking-description"
       >
         <h2 id="cancel-booking-title">Cancel booking?</h2>
-        <p>
+        <p id="cancel-booking-description">
           Your reservation for <strong>{booking.carName}</strong> will be
           cancelled.
         </p>
@@ -43,6 +59,7 @@ const ConfirmDialog = ({ booking, onCancel, onConfirm }) => {
             Keep booking
           </button>
           <button
+            ref={confirmButtonRef}
             className={styles.dangerButton}
             type="button"
             onClick={onConfirm}

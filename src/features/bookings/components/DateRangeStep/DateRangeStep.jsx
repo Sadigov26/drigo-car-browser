@@ -15,13 +15,22 @@ const DateRangeStep = ({
   today,
 }) => {
   return (
-    <div className={styles.stepContent}>
+    <div
+      className={styles.stepContent}
+      role="group"
+      aria-labelledby="booking-dates-heading"
+      aria-describedby="booking-dates-help"
+    >
       <div className={styles.intro}>
-        <h3>Choose your rental dates</h3>
-        <p>Rentals must be at least {MIN_RENTAL_DAYS} days.</p>
+        <h3 id="booking-dates-heading" tabIndex="-1" data-booking-focus>
+          Choose your rental dates
+        </h3>
+        <p id="booking-dates-help">
+          Rentals must be at least {MIN_RENTAL_DAYS} days.
+        </p>
       </div>
 
-      <div className={styles.availability}>
+      <div className={styles.availability} aria-live="polite">
         <strong>Booked dates</strong>
         {availabilityLoading ? (
           <p>Checking availability...</p>
@@ -56,9 +65,17 @@ const DateRangeStep = ({
             min={today}
             value={startDate}
             onChange={onChange}
+            aria-invalid={Boolean(errors.startDate)}
+            aria-describedby={
+              errors.startDate
+                ? "booking-start-error booking-dates-help"
+                : "booking-dates-help"
+            }
           />
           {errors.startDate && (
-            <span className={styles.error}>{errors.startDate}</span>
+            <span id="booking-start-error" className={styles.error}>
+              {errors.startDate}
+            </span>
           )}
         </div>
 
@@ -71,9 +88,17 @@ const DateRangeStep = ({
             min={startDate || today}
             value={endDate}
             onChange={onChange}
+            aria-invalid={Boolean(errors.endDate)}
+            aria-describedby={
+              errors.endDate
+                ? "booking-end-error booking-dates-help"
+                : "booking-dates-help"
+            }
           />
           {errors.endDate && (
-            <span className={styles.error}>{errors.endDate}</span>
+            <span id="booking-end-error" className={styles.error}>
+              {errors.endDate}
+            </span>
           )}
         </div>
       </div>

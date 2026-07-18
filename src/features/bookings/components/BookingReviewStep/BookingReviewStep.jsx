@@ -4,7 +4,9 @@ const BookingReviewStep = ({ car, driver, endDate, price, startDate }) => {
   return (
     <div className={styles.stepContent}>
       <div className={styles.intro}>
-        <h3>Review your booking</h3>
+        <h3 tabIndex="-1" data-booking-focus>
+          Review your booking
+        </h3>
         <p>Check the information before you confirm.</p>
       </div>
 
