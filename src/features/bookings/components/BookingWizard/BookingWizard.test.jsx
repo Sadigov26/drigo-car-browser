@@ -29,6 +29,10 @@ describe("BookingWizard", () => {
   it("completes all three steps and saves a valid booking", async () => {
     render(<BookingWizard car={car} />);
 
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+
     fireEvent.change(screen.getByLabelText("Start date"), {
       target: { value: "2026-08-10" },
     });
@@ -72,5 +76,28 @@ describe("BookingWizard", () => {
         }),
       ]),
     );
+  });
+
+  it("blocks a date range that overlaps a saved booking", async () => {
+    render(<BookingWizard car={car} />);
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+
+    fireEvent.change(screen.getByLabelText("Start date"), {
+      target: { value: "2026-07-21" },
+    });
+    fireEvent.change(screen.getByLabelText("End date"), {
+      target: { value: "2026-07-23" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(
+      screen.getByText(
+        "These dates overlap a booking from 2026-07-20 to 2026-07-24.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByText("Choose your rental dates")).toBeTruthy();
   });
 });

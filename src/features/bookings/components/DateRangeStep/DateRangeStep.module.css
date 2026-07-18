@@ -16,6 +16,59 @@
   font-size: 14px;
 }
 
+.availability {
+  padding: 13px 15px;
+  color: #334e68;
+  background-color: #f8fafc;
+  border-left: 4px solid #9fb3c8;
+}
+
+.availability > strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.availability p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.availability ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 0;
+  margin: 0;
+  list-style-position: inside;
+}
+
+.availability li {
+  color: #52606d;
+  font-size: 13px;
+}
+
+.availabilityError {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #9f1239;
+  font-size: 13px;
+}
+
+.availabilityError button {
+  padding: 5px 10px;
+  color: #9f1239;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: 1px solid #fda4af;
+  border-radius: 4px;
+}
+
 .dateFields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

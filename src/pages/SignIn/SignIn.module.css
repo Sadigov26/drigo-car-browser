@@ -1,0 +1,114 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #eef4f8;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: min(1120px, 100%);
+  flex: 1;
+  padding: 50px 20px;
+}
+
+.form {
+  width: min(480px, 100%);
+  padding: 28px;
+  background-color: #ffffff;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(15, 45, 77, 0.08);
+}
+
+.heading {
+  margin-bottom: 26px;
+}
+
+.heading p {
+  margin: 0 0 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.heading h1 {
+  margin: 0 0 7px;
+  color: #12263a;
+  font-size: 30px;
+}
+
+.heading span {
+  color: #52606d;
+  font-size: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 20px;
+}
+
+.field label {
+  color: #334e68;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px 2px;
+  color: #12263a;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid #9fb3c8;
+  border-radius: 0;
+}
+
+.field input:focus {
+  outline: 0;
+  border-bottom-color: #17406a;
+}
+
+.field > span {
+  color: #b42318;
+  font-size: 13px;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 11px 16px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #17406a;
+  border: 1px solid #17406a;
+  border-radius: 6px;
+}
+
+.submitButton:hover {
+  background-color: #0f2d4d;
+}
+
+.submitButton:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+@media screen and (max-width: 520px) {
+  .container {
+    padding: 28px 16px 40px;
+  }
+
+  .form {
+    padding: 22px 18px;
+  }
+}

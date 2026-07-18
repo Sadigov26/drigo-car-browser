@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearCarCaches } from "./carCache";
 import {
+  BOOKING_OVERLAP_ERROR,
   BOOKINGS_STORAGE_KEY,
   cancelBooking,
   createBooking,
@@ -117,5 +118,33 @@ describe("mockApi", () => {
     );
 
     expect(bookingsAfterCancel).toEqual([]);
+  });
+
+  it("rejects a booking that overlaps an existing booking for the car", async () => {
+    const request = createBooking({
+      carId: 1,
+      startDate: "2026-07-22",
+      endDate: "2026-07-26",
+      driver: "Overlap Test",
+    });
+    const rejection = expect(request).rejects.toMatchObject({
+      code: BOOKING_OVERLAP_ERROR,
+    });
+
+    await vi.runAllTimersAsync();
+    await rejection;
+  });
+
+  it("allows a booking that starts when an existing booking ends", async () => {
+    const booking = await finishRequest(
+      createBooking({
+        carId: 1,
+        startDate: "2026-07-24",
+        endDate: "2026-07-27",
+        driver: "Adjacent Date Test",
+      }),
+    );
+
+    expect(booking.startDate).toBe("2026-07-24");
   });
 });

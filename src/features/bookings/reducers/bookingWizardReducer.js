@@ -45,7 +45,12 @@ export const bookingWizardReducer = (state, action) => {
     case "previousStep":
       return { ...state, step: state.step - 1, submitError: "" };
     case "submitStart":
-      return { ...state, submitting: true, submitError: "" };
+      return {
+        ...state,
+        submitting: true,
+        submitError: "",
+        booking: action.booking,
+      };
     case "submitSuccess":
       return { ...state, submitting: false, booking: action.booking };
     case "submitError":
@@ -53,6 +58,7 @@ export const bookingWizardReducer = (state, action) => {
         ...state,
         submitting: false,
         submitError: action.message,
+        booking: null,
       };
     case "restart":
       return createInitialBookingState(action.user);

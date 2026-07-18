@@ -4,6 +4,7 @@ import {
   DEFAULT_FILTERS,
   PAGE_SIZE,
 } from "../features/cars/constants/carOptions";
+import { findOverlappingBooking } from "../features/bookings/utils/bookingAvailability";
 import {
   clampPage,
   filterCars,
@@ -21,6 +22,7 @@ import {
 } from "./carCache";
 
 export const BOOKINGS_STORAGE_KEY = "drigo-bookings";
+export const BOOKING_OVERLAP_ERROR = "BOOKING_OVERLAP";
 
 const FAILURE_RATE = 0.1;
 const MIN_DELAY = 600;
@@ -83,6 +85,16 @@ const saveBookings = (bookings) => {
   if (typeof localStorage !== "undefined") {
     localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
   }
+};
+
+const enrichBooking = (booking) => {
+  const car = cars.find((carItem) => carItem.id === Number(booking.carId));
+
+  return {
+    ...booking,
+    car: car ? { ...car } : null,
+    carName: booking.carName || car?.name || "Unknown car",
+  };
 };
 
 const normalizeCarQuery = (query) => {
@@ -165,10 +177,10 @@ export const getCar = (id) => {
 
 export const getBookings = (user) => {
   return runMockRequest(() => {
-    const bookings = readBookings();
+    const bookings = readBookings().map(enrichBooking);
 
     if (!user) {
-      return bookings;
+      return copyBookings(bookings);
     }
 
     const userEmail = typeof user === "string" ? user : user.email;
@@ -186,6 +198,16 @@ export const getBookings = (user) => {
 export const createBooking = (data) => {
   return runMockRequest(() => {
     const bookings = readBookings();
+    const overlappingBooking = findOverlappingBooking(bookings, data);
+
+    if (overlappingBooking) {
+      const overlapError = new Error(
+        `This car is already booked from ${overlappingBooking.startDate} to ${overlappingBooking.endDate}.`,
+      );
+      overlapError.code = BOOKING_OVERLAP_ERROR;
+      throw overlapError;
+    }
+
     const booking = {
       ...data,
       id: `booking-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -193,7 +215,7 @@ export const createBooking = (data) => {
 
     saveBookings([...bookings, booking]);
     invalidateCarCaches(booking.carId);
-    return { ...booking };
+    return enrichBooking(booking);
   }, "Could not create the booking. Please try again.");
 };
 

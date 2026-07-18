@@ -1,10 +1,15 @@
 import { MIN_RENTAL_DAYS } from "../../constants/bookingOptions";
+import { formatBookingDate } from "../../utils/bookingAvailability";
 import styles from "./DateRangeStep.module.css";
 
 const DateRangeStep = ({
+  availabilityError,
+  availabilityLoading,
+  bookings,
   endDate,
   errors,
   onChange,
+  onRetryAvailability,
   price,
   startDate,
   today,
@@ -14,6 +19,31 @@ const DateRangeStep = ({
       <div className={styles.intro}>
         <h3>Choose your rental dates</h3>
         <p>Rentals must be at least {MIN_RENTAL_DAYS} days.</p>
+      </div>
+
+      <div className={styles.availability}>
+        <strong>Booked dates</strong>
+        {availabilityLoading ? (
+          <p>Checking availability...</p>
+        ) : availabilityError ? (
+          <div className={styles.availabilityError}>
+            <span>Could not check booked dates.</span>
+            <button type="button" onClick={onRetryAvailability}>
+              Retry
+            </button>
+          </div>
+        ) : bookings.length ? (
+          <ul>
+            {bookings.map((booking) => (
+              <li key={booking.id}>
+                {formatBookingDate(booking.startDate)} - {" "}
+                {formatBookingDate(booking.endDate)}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No reserved dates for this car.</p>
+        )}
       </div>
 
       <div className={styles.dateFields}>
