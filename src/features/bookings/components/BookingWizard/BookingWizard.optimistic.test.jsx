@@ -6,9 +6,11 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import AppProvider from "../../../../context/AppContext/AppProvider";
 import BookingWizard from "./BookingWizard";
 
 const apiMocks = vi.hoisted(() => ({
+  cancelBooking: vi.fn(),
   createBooking: vi.fn(),
   getBookings: vi.fn(),
 }));
@@ -62,7 +64,11 @@ describe("BookingWizard optimistic create", () => {
         }),
     );
 
-    render(<BookingWizard car={car} />);
+    render(
+      <AppProvider>
+        <BookingWizard car={car} />
+      </AppProvider>,
+    );
     await screen.findByText("No reserved dates for this car.");
 
     completeBookingForm();

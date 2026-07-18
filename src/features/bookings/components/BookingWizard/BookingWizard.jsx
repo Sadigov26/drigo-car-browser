@@ -1,5 +1,5 @@
 import { useMemo, useReducer } from "react";
-import { createBooking } from "../../../../api/mockApi";
+import { useAppContext } from "../../../../context/AppContext/useAppContext";
 import { BOOKING_STEPS } from "../../constants/bookingOptions";
 import { useCarBookings } from "../../hooks/useCarBookings";
 import {
@@ -32,7 +32,8 @@ const getVisibleErrors = (errors, touched) => {
   );
 };
 
-const BookingWizard = ({ car, onBookingCreated, user }) => {
+const BookingWizard = ({ car, onBookingCreated }) => {
+  const { createBooking, user } = useAppContext();
   const [state, dispatch] = useReducer(
     bookingWizardReducer,
     user,
@@ -156,7 +157,7 @@ const BookingWizard = ({ car, onBookingCreated, user }) => {
     dispatch({ type: "submitStart", booking: optimisticBooking });
 
     try {
-      const savedBooking = await createBooking(bookingData);
+      const savedBooking = await createBooking(bookingData, car);
 
       replaceBooking(optimisticBooking.id, savedBooking);
       dispatch({ type: "submitSuccess", booking: savedBooking });

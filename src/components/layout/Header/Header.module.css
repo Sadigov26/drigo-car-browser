@@ -42,6 +42,12 @@
   text-align: right;
 }
 
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
 .navigation {
   display: flex;
   gap: 18px;
@@ -61,8 +67,52 @@
   border-bottom-color: #ffffff;
 }
 
+.signInLink {
+  padding-bottom: 4px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid #ffffff;
+}
+
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 18px;
+  border-left: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.userArea span {
+  max-width: 150px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userArea button {
+  padding: 4px 0;
+  color: #cbd9e6;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+.userArea button:hover {
+  color: #ffffff;
+}
+
 .navigation a:focus-visible,
-.brand:focus-visible {
+.brand:focus-visible,
+.signInLink:focus-visible,
+.userArea button:focus-visible {
   outline: 3px solid #93c5fd;
   outline-offset: 4px;
 }
@@ -75,6 +125,11 @@
 
   .headerRight {
     align-items: flex-start;
+  }
+
+  .navRow {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .header p {

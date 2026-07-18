@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BOOKINGS_STORAGE_KEY } from "../../../../api/mockApi";
+import AppProvider from "../../../../context/AppContext/AppProvider";
 import BookingWizard from "./BookingWizard";
 
 const car = {
@@ -27,7 +28,11 @@ describe("BookingWizard", () => {
   });
 
   it("completes all three steps and saves a valid booking", async () => {
-    render(<BookingWizard car={car} />);
+    render(
+      <AppProvider>
+        <BookingWizard car={car} />
+      </AppProvider>,
+    );
 
     await act(async () => {
       await vi.runAllTimersAsync();
@@ -79,7 +84,11 @@ describe("BookingWizard", () => {
   });
 
   it("blocks a date range that overlaps a saved booking", async () => {
-    render(<BookingWizard car={car} />);
+    render(
+      <AppProvider>
+        <BookingWizard car={car} />
+      </AppProvider>,
+    );
 
     await act(async () => {
       await vi.runAllTimersAsync();

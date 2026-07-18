@@ -11,3 +11,7 @@ I used `useReducer` because this page has many related controls. Most changes al
 On load, `CarBrowser` reads the query string with `useSearchParams`, validates values in `getFilterValuesFromUrl`, then uses those values as the reducer initial state. Bad values like unknown type, invalid sort, negative price, or bad page are ignored or clamped. After filtering and sorting, the page is clamped again if it is out of range, and the URL is rebuilt from the cleaned state.
 
 With one more day, I would add tests around URL parsing and page clamping. Those rules are important because reload and deep links depend on them, and small mistakes there can make the UI look fine until someone opens a copied URL.
+
+## Week 3 app state
+
+I chose React Context with `useReducer` because the signed-in user, bookings, and toast messages are needed on more than one page. Keeping them in one provider means the detail page and My Bookings use the same booking state. Creating and cancelling a booking can update that shared list immediately and roll it back if the mock API fails. The user is also saved in localStorage, so the protected route still recognizes them after reload. Browse search, filters, sort, and page do not belong in this context. They stay in the URL because users need to reload, copy, and revisit the exact same car list view.

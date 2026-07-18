@@ -1,7 +1,9 @@
 import { Link, useLocation, useParams } from "react-router-dom";
+import SignInPrompt from "../../components/auth/SignInPrompt/SignInPrompt";
 import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackMessage";
 import Footer from "../../components/layout/Footer/Footer";
 import Header from "../../components/layout/Header/Header";
+import { useAppContext } from "../../context/AppContext/useAppContext";
 import BookingWizard from "../../features/bookings/components/BookingWizard/BookingWizard";
 import { useCar } from "../../features/cars/hooks/useCar";
 import { useFavorites } from "../../features/cars/hooks/useFavorites";
@@ -10,6 +12,7 @@ import styles from "./CarDetail.module.css";
 const CarDetail = () => {
   const { id } = useParams();
   const location = useLocation();
+  const { user } = useAppContext();
   const {
     car,
     error,
@@ -122,7 +125,11 @@ const CarDetail = () => {
                 <span>{car.seats}</span>
               </p>
             </div>
-            <BookingWizard car={car} onBookingCreated={retry} />
+            {user ? (
+              <BookingWizard car={car} onBookingCreated={retry} />
+            ) : (
+              <SignInPrompt />
+            )}
           </article>
         ) : (
           <div className={styles.notFound}>

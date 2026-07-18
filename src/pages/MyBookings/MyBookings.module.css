@@ -75,35 +75,6 @@
   border-bottom: 1px solid #d9e2ec;
 }
 
-.mutationError {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 11px 14px;
-  margin-bottom: 18px;
-  color: #9f1239;
-  font-size: 13px;
-  background-color: #fff1f2;
-  border-left: 4px solid #be123c;
-}
-
-.mutationError button {
-  padding: 5px 9px;
-  color: #9f1239;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  background-color: #ffffff;
-  border: 1px solid #fda4af;
-  border-radius: 4px;
-}
-
-.mutationError button:focus-visible {
-  outline: 3px solid #fda4af;
-  outline-offset: 2px;
-}
-
 @media screen and (max-width: 600px) {
   .container {
     padding: 28px 16px 42px;
@@ -111,10 +82,5 @@
 
   .pageHeading h1 {
     font-size: 28px;
-  }
-
-  .mutationError {
-    align-items: flex-start;
-    flex-direction: column;
   }
 }

@@ -2,12 +2,10 @@ import { useCallback, useMemo, useState } from "react";
 import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackMessage";
 import Footer from "../../components/layout/Footer/Footer";
 import Header from "../../components/layout/Header/Header";
+import { useAppContext } from "../../context/AppContext/useAppContext";
 import BookingCard from "../../features/bookings/components/BookingCard/BookingCard";
 import ConfirmDialog from "../../features/bookings/components/ConfirmDialog/ConfirmDialog";
-import { useBookings } from "../../features/bookings/hooks/useBookings";
-import {
-  splitBookingsByDate,
-} from "../../features/bookings/utils/bookingAvailability";
+import { splitBookingsByDate } from "../../features/bookings/utils/bookingAvailability";
 import { getTodayDateString } from "../../features/bookings/utils/bookingValidation";
 import styles from "./MyBookings.module.css";
 
@@ -15,13 +13,10 @@ const MyBookings = () => {
   const {
     bookings,
     cancelBooking,
-    cancellingId,
-    dismissMutationError,
-    error,
-    loading,
-    mutationError,
-    retry,
-  } = useBookings();
+    bookingsError,
+    bookingsLoading,
+    retryBookings,
+  } = useAppContext();
   const [selectedBooking, setSelectedBooking] = useState(null);
   const bookingGroups = useMemo(
     () => splitBookingsByDate(bookings, getTodayDateString()),
@@ -36,7 +31,12 @@ const MyBookings = () => {
     const bookingId = selectedBooking.id;
 
     closeDialog();
-    await cancelBooking(bookingId);
+
+    try {
+      await cancelBooking(bookingId);
+    } catch {
+      // The context restores the removed booking and shows an error toast.
+    }
   };
 
   const renderBookingList = (bookingList, canCancel) => {
@@ -55,7 +55,6 @@ const MyBookings = () => {
             key={booking.id}
             booking={booking}
             canCancel={canCancel}
-            isCancelling={cancellingId === booking.id}
             onCancel={setSelectedBooking}
           />
         ))}
@@ -73,23 +72,14 @@ const MyBookings = () => {
           <span>View and manage your rental history.</span>
         </div>
 
-        {mutationError && (
-          <div className={styles.mutationError}>
-            <span>{mutationError}</span>
-            <button type="button" onClick={dismissMutationError}>
-              Dismiss
-            </button>
-          </div>
-        )}
-
-        {loading ? (
+        {bookingsLoading ? (
           <FeedbackMessage message="Loading bookings..." />
-        ) : error ? (
+        ) : bookingsError ? (
           <FeedbackMessage
             tone="error"
-            message={error.message}
+            message={bookingsError.message}
             actionLabel="Retry"
-            onAction={retry}
+            onAction={retryBookings}
           />
         ) : !bookings.length ? (
           <FeedbackMessage message="You do not have any bookings yet." />

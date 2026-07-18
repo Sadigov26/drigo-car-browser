@@ -1,7 +1,7 @@
 import { formatBookingDate } from "../../utils/bookingAvailability";
 import styles from "./BookingCard.module.css";
 
-const BookingCard = ({ booking, canCancel, isCancelling, onCancel }) => {
+const BookingCard = ({ booking, canCancel, onCancel }) => {
   return (
     <article className={styles.card}>
       <div className={styles.heading}>
@@ -37,9 +37,8 @@ const BookingCard = ({ booking, canCancel, isCancelling, onCancel }) => {
           className={styles.cancelButton}
           type="button"
           onClick={() => onCancel(booking)}
-          disabled={isCancelling}
         >
-          {isCancelling ? "Cancelling..." : "Cancel"}
+          Cancel
         </button>
       )}
     </article>

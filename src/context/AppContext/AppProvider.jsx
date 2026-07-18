@@ -6,8 +6,7 @@ import {
 } from "../../api/mockApi";
 import { appReducer, createInitialAppState } from "./appReducer";
 import AppContext from "./appContext";
-
-export const USER_STORAGE_KEY = "drigo-user";
+import { USER_STORAGE_KEY } from "./authOptions";
 
 let nextToastNumber = 1;
 

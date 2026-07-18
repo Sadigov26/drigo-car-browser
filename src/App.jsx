@@ -1,10 +1,15 @@
+import ToastContainer from './components/feedback/ToastContainer/ToastContainer'
+import AppProvider from './context/AppContext/AppProvider'
 import AppRouter from './router/AppRouter'
 
 const App = () => {
   return (
-    <div>
-      <AppRouter />
-    </div>
+    <AppProvider>
+      <div>
+        <AppRouter />
+        <ToastContainer />
+      </div>
+    </AppProvider>
   )
 }
 

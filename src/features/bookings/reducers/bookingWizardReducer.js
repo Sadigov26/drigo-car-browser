@@ -5,8 +5,8 @@ export const createInitialBookingState = (user = {}) => ({
   startDate: "",
   endDate: "",
   driver: {
-    fullName: user.name || "",
-    email: user.email || "",
+    fullName: user?.name || "",
+    email: user?.email || "",
     licenseNumber: "",
   },
   touched: {},
