@@ -1,23 +1,24 @@
-# Drigo Week 2 Car Browser
+# Drigo Week 3 Car Rental Platform
 
-React app for browsing a car rental dataset. The app loads cars through a fake async API, supports search, filters, sorting, pagination, detail pages, favorites, and keeps the current view in the URL query string.
+A self-contained React rental app with server-like async data loading. Users can browse cars, sign in, create a validated booking, view their bookings, and cancel upcoming reservations without a real backend.
 
 ## Features
 
-- Fake async API with loading, error, and retry states
-- Search cars by name with a custom 300ms debounce
-- Debounced min and max price filters
-- Filter by transmission, multiple car types, seats, availability, and favorites
-- Sort by price and name
-- Pagination with the current page stored in the URL
-- Detail route for each car: `/cars/:id`
-- Clean not-found state for unknown car ids
-- Back to results restores the previous filtered/sorted/paged view
-- Favorites persisted with localStorage
-- Filter, search, sort, and page state managed with `useReducer`
-- Visible car list derived with `useMemo`
-- Unit tests for filtering, sorting, debounce, and URL helpers
-- Responsive layout for smaller screens
+- Mock async data layer with 600-1200ms latency and a small failure rate
+- API-driven search, filtering, sorting, pagination, and total count
+- URL-synced browse state that survives reloads and deep links
+- Latest-request-wins protection for rapid filter changes
+- In-memory list/detail caching with background revalidation
+- Multi-step booking wizard with a refresh-safe draft
+- Date, minimum rental length, driver, overlap, and price validation
+- Live rental price with a fixed service fee
+- Booking persistence through localStorage
+- Optimistic booking creation and cancellation with rollback
+- Upcoming and Past sections on the protected My Bookings page
+- Persisted mock sign-in with return-to-intended-page behavior
+- Route, wizard, and dialog focus management
+- Hand-built confirmation dialog, toast system, and error boundary
+- Responsive layout and reduced-motion support
 
 ## Tech Stack
 
@@ -26,7 +27,9 @@ React app for browsing a car rental dataset. The app loads cars through a fake a
 - React Router
 - CSS Modules
 - Vitest
-- Testing Library
+- React Testing Library
+
+No UI component kit, data-fetching library, date library, or real API is used.
 
 ## How To Run
 
@@ -35,7 +38,7 @@ npm install
 npm run dev
 ```
 
-Then open the local URL shown in the terminal.
+Open the local URL printed by Vite.
 
 ## How To Test
 
@@ -45,16 +48,23 @@ npm run lint
 npm run build
 ```
 
-## Project Notes
+The test suite includes unit and integration coverage for the mock API, stale-result protection, caching, URL parsing, debounce, overlap rules, price calculation, booking flow, protected routes, optimistic rollback, draft restoration, and accessibility behavior.
 
-The car data is stored in `src/data/cars.json`, but UI components do not import it directly. Cars are loaded through `src/features/cars/api/carsApi.js` and consumed with the custom `useCars()` hook.
+## Project Structure
 
-Main logic locations:
+- `src/api/mockApi.js` - async cars and bookings operations
+- `src/api/carCache.js` - in-memory list/detail cache and invalidation
+- `src/context/AppContext` - shared user, bookings, mutations, and toasts
+- `src/features/cars` - browse components, hooks, reducer, and pure helpers
+- `src/features/bookings` - wizard, booking components, reducer, and rules
+- `src/pages` - Car Browser, Car Detail, Sign In, and My Bookings pages
+- `src/router` - application routes and protected-route integration tests
 
-- `src/pages/CarBrowser/CarBrowser.jsx` - list page, URL sync, and derived visible list
-- `src/pages/CarDetail/CarDetail.jsx` - detail route and not-found state
-- `src/features/cars/reducers/carFiltersReducer.js` - filter, search, sort, and page reducer
-- `src/features/cars/utils/carList.js` - pure filter, sort, and pagination helpers
-- `src/features/cars/utils/urlFilters.js` - URL query parsing and building
-- `src/features/cars/hooks/useDebounce.js` - shared debounce hook
-- `src/features/cars/hooks/useFavorites.js` - localStorage favorite state
+## Persistence
+
+- The signed-in user and bookings are stored in localStorage.
+- Favorites are stored in localStorage.
+- An unfinished booking form is stored in sessionStorage per car and user.
+- Search, filters, sort, and page are stored in the URL query string.
+
+The mock API intentionally fails occasionally. Loading, retry, updating, and empty states are part of the expected app behavior.

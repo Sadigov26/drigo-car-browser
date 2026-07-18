@@ -18,7 +18,7 @@ Overlap logic lives in the pure `bookingAvailability.js` utility, not in a compo
 
 ## 5. App state
 
-I chose React Context with `useReducer`, without an external state library. The signed-in user, bookings, optimistic mutation state, and toast messages are shared by detail and booking pages, so they live in app state. The user and bookings are persisted in localStorage. Browse search, filters, sort, and page stay in the URL. They are validated when read and rebuilt from active values. This split means a copied or reloaded browse URL restores the exact view, while temporary application behavior does not make the URL noisy.
+I chose React Context with `useReducer`, without an external state library. The signed-in user, bookings, optimistic mutation state, and toast messages are shared by detail and booking pages, so they live in app state. The user and bookings are persisted in localStorage. An unfinished wizard draft is stored in sessionStorage per car and user, so refreshing the detail page restores the form without making it permanent. Browse search, filters, sort, and page stay in the URL. They are validated when read and rebuilt from active values. This split means a copied or reloaded browse URL restores the exact view, while temporary application behavior does not make the URL noisy.
 
 ## 6. Protected routes
 
