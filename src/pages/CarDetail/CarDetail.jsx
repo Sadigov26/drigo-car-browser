@@ -2,25 +2,46 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import FeedbackMessage from "../../components/feedback/FeedbackMessage/FeedbackMessage";
 import Footer from "../../components/layout/Footer/Footer";
 import Header from "../../components/layout/Header/Header";
-import { useCars } from "../../features/cars/hooks/useCars";
+import { useCar } from "../../features/cars/hooks/useCar";
 import { useFavorites } from "../../features/cars/hooks/useFavorites";
 import styles from "./CarDetail.module.css";
 
 const CarDetail = () => {
   const { id } = useParams();
   const location = useLocation();
-  const { data: cars, error, loading, retry } = useCars();
+  const {
+    car,
+    error,
+    hasData,
+    loading,
+    retry,
+    updating,
+  } = useCar(id);
   const { isFavorite, toggleFavorite } = useFavorites();
-  const car = cars.find((carItem) => carItem.id === Number(id));
   const backPath = location.state?.from || "/";
 
   return (
     <div className={styles.page}>
       <Header />
       <main className={styles.detailContainer}>
+        {updating && (
+          <p className={styles.updateStatus} role="status">
+            Updating car details...
+          </p>
+        )}
+
+        {error && hasData && (
+          <div className={styles.refreshError}>
+            <span>{error.message}</span>
+            <button type="button" onClick={retry}>
+              Retry
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <FeedbackMessage message="Loading car details..." />
-        ) : error ? (
+        ) : error && !hasData ? (
           <FeedbackMessage
             tone="error"
             message={error.message}

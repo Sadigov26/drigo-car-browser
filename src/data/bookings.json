@@ -1,0 +1,6 @@
+[
+  { "id": "b1", "carId": 1, "startDate": "2026-07-20", "endDate": "2026-07-24", "driver": "Seed User" },
+  { "id": "b2", "carId": 1, "startDate": "2026-08-02", "endDate": "2026-08-05", "driver": "Seed User" },
+  { "id": "b3", "carId": 5, "startDate": "2026-07-18", "endDate": "2026-07-28", "driver": "Seed User" },
+  { "id": "b4", "carId": 9, "startDate": "2026-07-15", "endDate": "2026-07-17", "driver": "Seed User" }
+]

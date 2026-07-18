@@ -6,7 +6,6 @@ import Header from "../../components/layout/Header/Header";
 import CarGrid from "../../features/cars/components/CarGrid/CarGrid";
 import Pagination from "../../features/cars/components/Pagination/Pagination";
 import SearchBox from "../../features/cars/components/SearchBox/SearchBox";
-import { PAGE_SIZE } from "../../features/cars/constants/carOptions";
 import { useCars } from "../../features/cars/hooks/useCars";
 import { useDebounce } from "../../features/cars/hooks/useDebounce";
 import { useFavorites } from "../../features/cars/hooks/useFavorites";
@@ -15,20 +14,12 @@ import {
   createInitialFilters,
 } from "../../features/cars/reducers/carFiltersReducer";
 import {
-  clampPage,
-  filterCars,
-  getPageCount,
-  paginateCars,
-  sortCars,
-} from "../../features/cars/utils/carList";
-import {
   buildFilterSearchParams,
   getFilterValuesFromUrl,
 } from "../../features/cars/utils/urlFilters";
 import styles from "./CarBrowser.module.css";
 
 const CarBrowser = () => {
-  const { data: cars, error, loading, retry } = useCars();
   const { favoriteIds, isFavorite, toggleFavorite } = useFavorites();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlValues = getFilterValuesFromUrl(searchParams);
@@ -42,8 +33,8 @@ const CarBrowser = () => {
   const debouncedMinPrice = useDebounce(filters.minPrice, 300);
   const debouncedMaxPrice = useDebounce(filters.maxPrice, 300);
 
-  const visibleState = useMemo(() => {
-    const filteredCars = filterCars(cars, {
+  const carQuery = useMemo(
+    () => ({
       search: debouncedSearchText,
       transmission: filters.transmission,
       types: filters.types,
@@ -53,33 +44,35 @@ const CarBrowser = () => {
       available: filters.available,
       favoritesOnly: filters.favoritesOnly,
       favoriteIds,
-    });
+      sort: filters.sort,
+      page: filters.page,
+    }),
+    [
+      debouncedSearchText,
+      filters.transmission,
+      filters.types,
+      debouncedMinPrice,
+      debouncedMaxPrice,
+      filters.seats,
+      filters.available,
+      filters.favoritesOnly,
+      favoriteIds,
+      filters.sort,
+      filters.page,
+    ],
+  );
 
-    const sortedCars = sortCars(filteredCars, filters.sort);
-    const pageCount = getPageCount(sortedCars.length, PAGE_SIZE);
-    const safePage = clampPage(filters.page, pageCount);
-    const visibleCars = paginateCars(sortedCars, safePage, PAGE_SIZE);
-
-    return {
-      pageCount,
-      safePage,
-      sortedCars,
-      visibleCars,
-    };
-  }, [
+  const {
     cars,
-    debouncedSearchText,
-    filters.transmission,
-    filters.types,
-    debouncedMinPrice,
-    debouncedMaxPrice,
-    filters.seats,
-    filters.available,
-    filters.favoritesOnly,
-    filters.sort,
-    filters.page,
-    favoriteIds,
-  ]);
+    error,
+    hasData,
+    loading,
+    page,
+    pageCount,
+    retry,
+    total,
+    updating,
+  } = useCars(carQuery);
 
   useEffect(() => {
     const nextParams = buildFilterSearchParams({
@@ -92,7 +85,7 @@ const CarBrowser = () => {
       available: filters.available,
       favoritesOnly: filters.favoritesOnly,
       sort: filters.sort,
-      page: visibleState.safePage,
+      page: filters.page,
     });
 
     if (nextParams.toString() !== searchParams.toString()) {
@@ -108,18 +101,39 @@ const CarBrowser = () => {
     filters.available,
     filters.favoritesOnly,
     filters.sort,
-    visibleState.safePage,
+    filters.page,
     searchParams,
     setSearchParams,
   ]);
+
+  useEffect(() => {
+    if (!loading && !updating && !error && page !== filters.page) {
+      dispatch({ type: "setPage", value: page });
+    }
+  }, [error, filters.page, loading, page, updating]);
 
   return (
     <div className={styles.page}>
       <Header />
       <div className={styles.searchContainer}>
+        {updating && (
+          <p className={styles.updateStatus} role="status">
+            Updating results...
+          </p>
+        )}
+
+        {error && hasData && (
+          <div className={styles.refreshError}>
+            <span>{error.message}</span>
+            <button type="button" onClick={retry}>
+              Retry
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <FeedbackMessage message="Loading cars..." />
-        ) : error ? (
+        ) : error && !hasData ? (
           <FeedbackMessage
             tone="error"
             message={error.message}
@@ -160,20 +174,19 @@ const CarBrowser = () => {
             />
 
             <p className={styles.counter}>
-              Showing {visibleState.visibleCars.length} of{" "}
-              {visibleState.sortedCars.length} cars
+              Showing {cars.length} of {total} cars
             </p>
 
-            {visibleState.sortedCars.length > 0 ? (
+            {total > 0 ? (
               <>
                 <CarGrid
-                  cars={visibleState.visibleCars}
+                  cars={cars}
                   isFavorite={isFavorite}
                   onFavoriteToggle={toggleFavorite}
                 />
                 <Pagination
-                  currentPage={visibleState.safePage}
-                  pageCount={visibleState.pageCount}
+                  currentPage={page}
+                  pageCount={pageCount}
                   onPageChange={(value) => dispatch({ type: "setPage", value })}
                 />
               </>

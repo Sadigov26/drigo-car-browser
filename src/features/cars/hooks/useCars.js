@@ -1,59 +1,76 @@
 import { useEffect, useState } from "react";
-import { getCars } from "../api/carsApi";
+import {
+  getCachedCars,
+  getCars,
+  getCarsQueryKey,
+} from "../../../api/mockApi";
 
-export const useCars = () => {
+export const useCars = (query) => {
   const [carsState, setCarsState] = useState({
-    data: [],
     error: null,
-    loading: true,
+    queryKey: null,
+    requestKey: null,
+    result: null,
   });
   const [reloadKey, setReloadKey] = useState(0);
+  const queryKey = getCarsQueryKey(query);
+  const currentRequestKey = `${queryKey}:${reloadKey}`;
+  const cachedResult = getCachedCars(query);
+  const stateResult =
+    carsState.queryKey === queryKey ? carsState.result : null;
+  const currentResult = stateResult || cachedResult;
+  const result = currentResult || carsState.result;
+  const hasData = Boolean(result);
+  const requestFinished = carsState.requestKey === currentRequestKey;
 
   useEffect(() => {
-    let isCurrentRequest = true;
+    let ignoreResult = false;
+    const requestKey = `${queryKey}:${reloadKey}`;
+    const requestQuery = JSON.parse(queryKey);
 
-    getCars()
-      .then((cars) => {
-        if (!isCurrentRequest) {
+    getCars(requestQuery)
+      .then((result) => {
+        if (ignoreResult) {
           return;
         }
 
         setCarsState({
-          data: cars,
+          result,
           error: null,
-          loading: false,
+          queryKey,
+          requestKey,
         });
       })
       .catch((error) => {
-        if (!isCurrentRequest) {
+        if (ignoreResult) {
           return;
         }
 
-        setCarsState({
-          data: [],
+        setCarsState((currentState) => ({
+          ...currentState,
           error,
-          loading: false,
-        });
+          requestKey,
+        }));
       });
 
     return () => {
-      isCurrentRequest = false;
+      ignoreResult = true;
     };
-  }, [reloadKey]);
+  }, [queryKey, reloadKey]);
 
   const retry = () => {
-    setCarsState({
-      data: [],
-      error: null,
-      loading: true,
-    });
     setReloadKey((currentKey) => currentKey + 1);
   };
 
   return {
-    data: carsState.data,
-    error: carsState.error,
-    loading: carsState.loading,
+    cars: result?.cars ?? [],
+    error: requestFinished ? carsState.error : null,
+    hasData,
+    loading: !hasData && !requestFinished,
+    page: result?.page ?? 1,
+    pageCount: result?.pageCount ?? 1,
     retry,
+    total: result?.total ?? 0,
+    updating: hasData && !requestFinished,
   };
 };

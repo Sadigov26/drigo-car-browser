@@ -24,3 +24,49 @@
   font-weight: 700;
   text-align: left;
 }
+
+.updateStatus {
+  align-self: flex-end;
+  margin: 0 0 8px;
+  color: #52606d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.refreshError {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  color: #9f1239;
+  font-size: 13px;
+  background-color: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 6px;
+}
+
+.refreshError button {
+  padding: 5px 10px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #9f1239;
+  border: 0;
+  border-radius: 4px;
+}
+
+.refreshError button:focus-visible {
+  outline: 3px solid #fda4af;
+  outline-offset: 2px;
+}
+
+@media screen and (max-width: 520px) {
+  .refreshError {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
